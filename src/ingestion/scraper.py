@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 class PropertyIngestor:
     """
     The Universal Ingestion Engine for the Data Quality Framework.
-    Supports: Live APIs, City Records (Scraping), and Manual Uploads.
+    
+    Responsible for acquiring raw property data from disparate streams 
+    including Live APIs, Public City Records, and Manual CSV Uploads.
     """
     def __init__(self):
         # Senior Engineer Trick: Find the Project Root automatically
@@ -30,9 +32,17 @@ class PropertyIngestor:
         print(f"[+] Raw data archived: {filepath}")
         return filepath
 
-    def fetch_api_data(self, api_url, start_date=None, end_date=None):
+    def fetch_api_data(self, api_url: str, start_date: str = None, end_date: str = None) -> str:
         """
-        OPTION 3: Fetch data from a Real Estate API within a time period.
+        Fetches property listings from a Real Estate API within a specific date range.
+        
+        Args:
+            api_url (str): The endpoint for the Zillow-sim API.
+            start_date (str): Beginning of the filter period (YYYY-MM-DD).
+            end_date (str): End of the filter period (YYYY-MM-DD).
+            
+        Returns:
+            str: The local file path to the archived raw JSON data.
         """
         print(f"[*] Calling Real Estate API: {api_url} for period {start_date} to {end_date}...")
         try:
@@ -66,9 +76,17 @@ class PropertyIngestor:
             print(f"[!] API Error: {e}")
             return None
 
-    def scrape_city_records(self, url, start_date=None, end_date=None):
+    def scrape_city_records(self, url: str, start_date: str = None, end_date: str = None) -> str:
         """
-        OPTION 4: Scrape Public City Records within a time period.
+        Simulates scraping public property tax records from a government portal.
+        
+        Args:
+            url (str): The mock city council URL.
+            start_date (str): Beginning of the filter period.
+            end_date (str): End of the filter period.
+            
+        Returns:
+            str: The local file path to the archived raw HTML data.
         """
         print(f"[*] Scraping Public Records from: {url} for period {start_date} to {end_date}...")
         try:
