@@ -1,0 +1,22 @@
+# Python .gitignore for Data Quality Project
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data folders (Ignore contents but keep folders)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
