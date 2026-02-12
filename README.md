@@ -21,18 +21,18 @@ The Data Quality & Trustability Framework is a comprehensive Python-based soluti
 
 ### 👥 Team & Contributions
 
-#### **Lead 1: [Your Name/Role]**
+#### **Lead: Varshini J**
 *   **Project Architect**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) architecture.
 *   **Ingestion Engine**: Developed `scraper.py` for multi-source property data acquisition.
 *   **Data Remediation**: Engineered `cleaner.py` for automated data sanitization and format standardization.
 *   **Orchestration**: Built the master `main.py` controller and interactive CLI.
 
-#### **Contributor 1: Varshini Jayaprabhu**
+#### **Person 1: Varshini J**
 *   **Branching Strategy**: Designed the professional Git workflow (`main`, `distributable`, `dev/`).
 *   **Documentation Lead**: Authored the project roadmap and contributor guidelines.
 *   **QA Consultant**: Verified pipeline logic and integration stability.
 
-#### **Contributor 2: Sangu**
+#### **Person 2: Sangappa Arjun Malakappanavar**
 *   **QA Engine**: Implemented the **7-Dimensional Trustability Framework** (Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, Lineage).
 *   **Reporting Layer**: Developed the `generator.py` dashboard for executive quality summaries.
 *   **Trustability Scoring**: Engineered the percentage-based data health scoring algorithm.
