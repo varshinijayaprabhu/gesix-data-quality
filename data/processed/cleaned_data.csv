@@ -1,6 +1,7 @@
 address,price,listed_date,source,ingested_at,remediation_notes
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 101 Emerald Street,315000.0,2026-02-11,Zillow_API,2026-02-12T14:12:32.908401,
 102 Emerald Street,330000.0,2026-02-10,Zillow_API,2026-02-12T14:12:32.908413,
 103 Emerald Street,345000.0,2026-02-09,Zillow_API,2026-02-12T14:12:32.908417,
@@ -48,4 +49,22 @@ address,price,listed_date,source,ingested_at,remediation_notes
 114 Emerald Street,510000.0,2026-01-29,Zillow_API,2026-02-12T14:19:35.164061,
 >>>>>>> dev/varshini
 =======
+>>>>>>> dev/varshini
+=======
+113 Emerald Street,495000.0,2026-01-30,Zillow_API,2026-02-12T18:39:53.022975,
+114 Emerald Street,510000.0,2026-01-29,Zillow_API,2026-02-12T18:39:53.022998,
+116 Emerald Street,540000.0,2026-01-27,Zillow_API,2026-02-12T18:39:53.023008,
+117 Emerald Street,555000.0,2026-01-26,Zillow_API,2026-02-12T18:39:53.023012,
+118 Emerald Street,570000.0,2026-01-25,Zillow_API,2026-02-12T18:39:53.023015,
+119 Emerald Street,585000.0,2026-01-24,Zillow_API,2026-02-12T18:39:53.023018,
+120 Emerald Street,0.0,2026-01-23,Zillow_API,2026-02-12T18:39:53.023021,Price invalid or missing - flagged for review
+121 Emerald Street,615000.0,2026-01-22,Zillow_API,2026-02-12T18:39:53.023024,
+122 Emerald Street,630000.0,2026-01-21,Zillow_API,2026-02-12T18:39:53.023026,
+123 Emerald Street,645000.0,2026-01-20,Zillow_API,2026-02-12T18:39:53.023029,
+124 Emerald Street,660000.0,2026-01-19,Zillow_API,2026-02-12T18:39:53.023031,
+125 Emerald Street,675000.0,2026-01-18,Zillow_API,2026-02-12T18:39:53.023034,
+126 Emerald Street,690000.0,2026-01-17,Zillow_API,2026-02-12T18:39:53.023036,
+127 Emerald Street,705000.0,2026-01-16,Zillow_API,2026-02-12T18:39:53.023038,
+128 Emerald Street,720000.0,2026-01-15,Zillow_API,2026-02-12T18:39:53.023041,
+129 Emerald Street,735000.0,2026-01-14,Zillow_API,2026-02-12T18:39:53.023043,
 >>>>>>> dev/varshini

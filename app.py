@@ -15,6 +15,22 @@ def index():
     except Exception as e:
         return f"<h1>Error: Dashboard not found</h1><p>Please run the pipeline first using <code>python main.py</code></p><p>Technical Error: {str(e)}</p>"
 
+from flask import request, redirect, url_for
+from main import run_pipeline
+
+@app.route('/process', methods=['POST'])
+def process():
+    """Triggers the data pipeline with user-provided dates."""
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    
+    print(f"[*] Web Server trigger: Processing data from {start_date} to {end_date}")
+    try:
+        run_pipeline(start_date=start_date, end_date=end_date)
+        return redirect(url_for('index'))
+    except Exception as e:
+        return f"<h1>⚠️ Pipeline Error</h1><p>{str(e)}</p><a href='/'>Go Back</a>"
+
 if __name__ == '__main__':
     print("\n" + "="*50)
     print("🚀 Gesix Web Server Starting...")
