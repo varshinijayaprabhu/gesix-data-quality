@@ -42,9 +42,22 @@ def run_pipeline():
         converter.unify_to_csv()
 
         # Step 3: Remediation/Cleaning
-        print("\n[STEP 3/3] Running Data Remediation (Auto-Fix)...")
+        print("\n[STEP 3/5] Running Data Remediation (Auto-Fix)...")
         cleaner = DataCleaner()
         cleaned_file = cleaner.run_remediation()
+
+        # Step 4: Quality Assurance (Member 2 Task)
+        print("\n[STEP 4/5] Executing QA Engine (Trustability Scoring)...")
+        from qa.validator import DataValidator
+        validator = DataValidator()
+        quality_scores = validator.validate(cleaned_file)
+
+        # Step 5: Final Reporting (Member 2 Task)
+        print("\n[STEP 5/5] Generating Final Trustability Report...")
+        from reporting.generator import ReportGenerator
+        reporter = ReportGenerator()
+        reporter.generate_summary(quality_scores)
+        reporter.save_report(quality_scores)
 
         print("\n" + "="*50)
         print("✅ PIPELINE SUCCESSFUL!")
