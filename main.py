@@ -8,7 +8,7 @@ from ingestion.scraper import PropertyIngestor
 from ingestion.converter import DataConverter
 from remediation.cleaner import DataCleaner
 
-def run_pipeline():
+def run_pipeline(start_date=None, end_date=None):
     print("\n" + "="*50)
     print("      REAL ESTATE DATA QUALITY PIPELINE (MEMBER 1)")
     print("="*50 + "\n")
@@ -19,10 +19,14 @@ def run_pipeline():
         ingestor = PropertyIngestor()
         
         # Capture user dates for the entire pipeline
-        print("\nPipeline Configuration:")
-        print("Format: YYYY-MM-DD (e.g., 2026-02-01)")
-        user_start = input("  Enter Start Date [Enter for default]: ")
-        user_end = input("  Enter End Date   [Enter for default]: ")
+        if not start_date or not end_date:
+            print("\nPipeline Configuration:")
+            print("Format: YYYY-MM-DD (e.g., 2026-02-01)")
+            user_start = start_date or input("  Enter Start Date [Enter for default]: ")
+            user_end = end_date or input("  Enter End Date   [Enter for default]: ")
+        else:
+            user_start = start_date
+            user_end = end_date
         
         # Fallbacks (logic matching scraper)
         from datetime import datetime, timedelta
