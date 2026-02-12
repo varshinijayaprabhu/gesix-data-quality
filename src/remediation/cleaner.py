@@ -51,6 +51,37 @@ class DataCleaner:
         print(df)
         return self.output_file
 
+    def targeted_remediation(self, feedback):
+        """
+        SMART FEEDBACK LOOP: Applies surgical fixes based on QA Engine feedback.
+        """
+        print("[*] Running Targeted Remediation Pass...")
+        df = pd.read_csv(self.output_file)
+        initial_count = len(df)
+        
+        if not feedback or 'issue_metadata' not in feedback:
+            return self.output_file
+
+        metadata = feedback['issue_metadata']
+        
+        # Action A: Remove Duplicates identified by QA
+        if metadata.get('duplicate_indices'):
+            print(f"    [-] Removing {len(metadata['duplicate_indices'])} duplicate records...")
+            df = df.drop(index=metadata['duplicate_indices'])
+            
+        # Action B: Remove Corrupt/Integrity Failure records
+        if metadata.get('integrity_fail_indices'):
+            # Filter valid indices that still exist
+            targets = [i for i in metadata['integrity_fail_indices'] if i in df.index]
+            if targets:
+                print(f"    [-] Removing {len(targets)} records with integrity failures...")
+                df = df.drop(index=targets)
+
+        df.to_csv(self.output_file, index=False)
+        final_count = len(df)
+        print(f"[+] Targeted Fixes Complete. Records reduced from {initial_count} to {final_count}.")
+        return self.output_file
+
 if __name__ == "__main__":
     cleaner = DataCleaner()
     cleaner.run_remediation()

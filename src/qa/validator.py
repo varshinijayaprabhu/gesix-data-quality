@@ -24,14 +24,16 @@ class DataValidator:
 
         # --- 7 DIMENSIONS CALCULATION ---
         
-        # 1. Completeness: % of rows where critical fields (address, price) aren't null or remediated
+        # 1. Completeness: % of rows where critical fields aren't null
         price_complete = df['price'].notna().sum()
         address_complete = df['address'].notna().sum()
         dim_completeness = ((price_complete + address_complete) / (2 * total)) * 100
 
-        # 2. Accuracy: % of prices within realistic market range (e.g., $50k to $10M)
-        # We check if 'remediation_notes' contains "invalid" for prices
-        invalid_prices = df[df['remediation_notes'].str.contains("Price invalid", na=False)].shape[0]
+        # 2. Accuracy: % of prices within realistic market range
+        # Check if 'remediation_notes' flags price invalidity
+        invalid_prices = 0
+        if 'remediation_notes' in df.columns:
+            invalid_prices = df[df['remediation_notes'].str.contains("Price invalid", na=False)].shape[0]
         dim_accuracy = ((total - invalid_prices) / total) * 100
 
         # 3. Validity: % of dates matching YYYY-MM-DD format
@@ -47,16 +49,16 @@ class DataValidator:
             dim_consistency = 0
 
         # 5. Uniqueness: % of records with unique addresses
-        unique_addresses = df['address'].nunique()
-        dim_uniqueness = (unique_addresses / total) * 100
+        duplicate_mask = df.duplicated(subset=['address'], keep='first')
+        dim_uniqueness = ((total - duplicate_mask.sum()) / total) * 100
+        duplicate_indices = df[duplicate_mask].index.tolist()
 
-        # 6. Integrity: % of records matching the expected schema type (e.g., price is numeric)
-        # Since CSV reads everything as strings potentially, we check if price can be float
-        integrity_check = pd.to_numeric(df['price'], errors='coerce').notna().sum()
-        dim_integrity = (integrity_check / total) * 100
+        # 6. Integrity: % of records matching the expected schema type
+        integrity_mask = pd.to_numeric(df['price'], errors='coerce').notna()
+        dim_integrity = (integrity_mask.sum() / total) * 100
+        integrity_fail_indices = df[~integrity_mask].index.tolist()
 
-        # 7. Lineage: % of records with a traceable source (source column exists and is not empty)
-        # Assuming DataConverter adds 'source'
+        # 7. Lineage: % of records with a traceable source
         if 'source' in df.columns:
             lineage_count = df['source'].notna().sum()
         else:
@@ -78,6 +80,10 @@ class DataValidator:
                 "Uniqueness": round(dim_uniqueness, 2),
                 "Integrity": round(dim_integrity, 2),
                 "Lineage": round(dim_lineage, 2)
+            },
+            "issue_metadata": {
+                "duplicate_indices": duplicate_indices,
+                "integrity_fail_indices": integrity_fail_indices
             }
         }
         

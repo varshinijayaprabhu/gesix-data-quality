@@ -1,7 +1,5 @@
 import sys
 import os
-import pandas as pd
-from datetime import datetime, timedelta
 
 # Adding src to path so we can import our modules
 sys.path.append(os.path.join(os.getcwd(), "src"))
@@ -9,17 +7,15 @@ sys.path.append(os.path.join(os.getcwd(), "src"))
 from ingestion.scraper import PropertyIngestor
 from ingestion.converter import DataConverter
 from remediation.cleaner import DataCleaner
-from qa.validator import DataValidator
-from reporting.generator import ReportGenerator
 
 def run_pipeline():
     print("\n" + "="*50)
-    print("      REAL ESTATE DATA QUALITY PIPELINE (MASTER)")
+    print("      REAL ESTATE DATA QUALITY PIPELINE (MEMBER 1)")
     print("="*50 + "\n")
 
     try:
         # Step 1: Ingestion
-        print("[STEP 1/5] Starting Data Ingestion...")
+        print("[STEP 1/3] Starting Data Ingestion...")
         ingestor = PropertyIngestor()
         
         # Capture user dates for the entire pipeline
@@ -28,30 +24,46 @@ def run_pipeline():
         user_start = input("  Enter Start Date [Enter for default]: ")
         user_end = input("  Enter End Date   [Enter for default]: ")
         
-        # Fallbacks
+        # Fallbacks (logic matching scraper)
+        from datetime import datetime, timedelta
         if not user_start: user_start = (datetime.now() - timedelta(days=15)).strftime("%Y-%m-%d")
         if not user_end: user_end = datetime.now().strftime("%Y-%m-%d")
         
-        ingestor.fetch_api_data("https://api.rapidapi.com/zillow-sim", start_date=user_start, end_date=user_end)
-        ingestor.scrape_city_records("https://city-council.gov/property-tax", start_date=user_start, end_date=user_end)
+        raw_api = ingestor.fetch_api_data("https://api.rapidapi.com/zillow-sim", start_date=user_start, end_date=user_end)
+        raw_city = ingestor.scrape_city_records("https://city-council.gov/property-tax", start_date=user_start, end_date=user_end)
         
+        if not raw_api and not raw_city:
+            print("[!] Pipeline aborted: No data fetched.")
+            return
+
         # Step 2: Unification/Conversion
-        print("\n[STEP 2/5] Transforming Raw Data to Unified CSV...")
+        print("\n[STEP 2/3] Transforming Raw Data to Unified CSV...")
         converter = DataConverter()
-        structured_file = converter.unify_to_csv()
+        converter.unify_to_csv()
 
         # Step 3: Remediation/Cleaning
         print("\n[STEP 3/5] Running Data Remediation (Auto-Fix)...")
         cleaner = DataCleaner()
         cleaned_file = cleaner.run_remediation()
 
-        # Step 4: Quality Assurance (Consolidated 7-Dimensions)
-        print("\n[STEP 4/5] Executing Advanced QA Engine...")
+        # Step 4: Quality Assurance (Initial Pass)
+        print("\n[STEP 4/5] Executing Advanced QA Engine (Initial Pass)...")
+        from qa.validator import DataValidator
         validator = DataValidator()
         quality_report = validator.validate(cleaned_file)
+        
+        # Step 5: Smart Feedback Loop (Dynamic Pass)
+        # If score is below 95%, trigger targeted remediation
+        if quality_report['overall_trustability'] < 95.0:
+            print("\n[SMART LOOP] Trustability < 95%. Triggering Feedback-Driven Remediation...")
+            cleaner.targeted_remediation(quality_report)
+            
+            print("[SMART LOOP] Re-validating dataset...")
+            quality_report = validator.validate(cleaned_file)
 
-        # Step 5: Final Reporting
-        print("\n[STEP 5/5] Generating Data Quality Dashboard...")
+        # Step 6: Final Reporting
+        print("\n[STEP 5/5] Generating Final Data Quality Dashboard...")
+        from reporting.generator import ReportGenerator
         reporter = ReportGenerator()
         reporter.generate_summary(quality_report)
         reporter.save_report(quality_report)
