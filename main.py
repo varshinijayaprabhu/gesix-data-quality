@@ -46,22 +46,31 @@ def run_pipeline():
         cleaner = DataCleaner()
         cleaned_file = cleaner.run_remediation()
 
-        # Step 4: Quality Assurance (Member 2 Task)
-        print("\n[STEP 4/5] Executing QA Engine (Trustability Scoring)...")
+        # Step 4: Quality Assurance (Initial Pass)
+        print("\n[STEP 4/5] Executing Advanced QA Engine (Initial Pass)...")
         from qa.validator import DataValidator
         validator = DataValidator()
-        quality_scores = validator.validate(cleaned_file)
+        quality_report = validator.validate(cleaned_file)
+        
+        # Step 5: Smart Feedback Loop (Dynamic Pass)
+        # If score is below 95%, trigger targeted remediation
+        if quality_report['overall_trustability'] < 95.0:
+            print("\n[SMART LOOP] Trustability < 95%. Triggering Feedback-Driven Remediation...")
+            cleaner.targeted_remediation(quality_report)
+            
+            print("[SMART LOOP] Re-validating dataset...")
+            quality_report = validator.validate(cleaned_file)
 
-        # Step 5: Final Reporting (Member 2 Task)
-        print("\n[STEP 5/5] Generating Final Trustability Report...")
+        # Step 6: Final Reporting
+        print("\n[STEP 5/5] Generating Final Data Quality Dashboard...")
         from reporting.generator import ReportGenerator
         reporter = ReportGenerator()
-        reporter.generate_summary(quality_scores)
-        reporter.save_report(quality_scores)
+        reporter.generate_summary(quality_report)
+        reporter.save_report(quality_report)
 
         print("\n" + "="*50)
-        print("✅ PIPELINE SUCCESSFUL!")
-        print(f"Final Cleaned Dataset: {os.path.basename(cleaned_file)}")
+        print("✅ PIPELINE EXECUTION FINISHED!")
+        print(f"Final Dataset: data/processed/cleaned_data.csv")
         print("="*50 + "\n")
 
     except Exception as e:
