@@ -19,10 +19,26 @@ class DataCleaner:
 
     def standardize_addresses(self, df):
         """Removes whitespace and standardizes common abbreviations (Format Validity)."""
-        print("[*] Standardizing address formats...")
-        df['address'] = df['address'].str.strip()
-        df['address'] = df['address'].str.replace('St.', 'Street', regex=False)
-        df['address'] = df['address'].str.replace('Ave.', 'Avenue', regex=False)
+        print("[*] Standardizing address formats (Title Case + Abbreviations)...")
+        # Ensure string type and strip
+        df['address'] = df['address'].astype(str).str.strip().str.title()
+        
+        # Consistent mapping for abbreviations
+        abbrev_map = {
+            'St': 'Street',
+            'St.': 'Street',
+            'Ave': 'Avenue',
+            'Ave.': 'Avenue',
+            'Rd': 'Road',
+            'Rd.': 'Road',
+            'Blvd': 'Boulevard',
+            'Ln': 'Lane'
+        }
+        
+        for abbrev, full in abbrev_map.items():
+            # Use regex with word boundaries to avoid partial matches (e.g., "Stone" -> "Streete")
+            df['address'] = df['address'].str.replace(rf'\b{abbrev}\b', full, regex=True)
+            
         return df
 
     def handle_missing_prices(self, df):
@@ -44,6 +60,12 @@ class DataCleaner:
         # Apply Fixes
         df = self.standardize_addresses(df)
         df = self.handle_missing_prices(df)
+
+        # MANDATORY DEDUPLICATION: Ensure "U" flag is cleared even if score high
+        initial_len = len(df)
+        df = df.drop_duplicates(subset=['address', 'listed_date'], keep='first')
+        if len(df) < initial_len:
+            print(f"[*] Deduped: Removed {initial_len - len(df)} duplicate records based on Address+Date.")
 
         # Save the "Cleaned" version
         df.to_csv(self.output_file, index=False)

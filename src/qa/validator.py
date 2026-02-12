@@ -55,7 +55,9 @@ class DataValidator:
             dim_consistency = 0
 
         # 5. Uniqueness: % of records with unique addresses
-        duplicate_mask = df.duplicated(subset=['address'], keep='first')
+        # Normalize for pickier check
+        norm_addresses = df['address'].astype(str).str.strip().str.title()
+        duplicate_mask = norm_addresses.duplicated(keep='first')
         dim_uniqueness = ((total - duplicate_mask.sum()) / total) * 100
         duplicate_indices = df[duplicate_mask].index.tolist()
 
