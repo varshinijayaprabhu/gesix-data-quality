@@ -1,0 +1,4 @@
+/* Global app styles - page-specific styles are in page CSS files */
+#root {
+  min-height: 100vh;
+}

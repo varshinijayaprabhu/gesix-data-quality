@@ -38,7 +38,7 @@ def run_pipeline(start_date=None, end_date=None):
         
         if not raw_api and not raw_city:
             print("[!] Pipeline aborted: No data fetched.")
-            return
+            return None
 
         # Step 2: Unification/Conversion
         print("\n[STEP 2/3] Transforming Raw Data to Unified CSV...")
@@ -74,12 +74,14 @@ def run_pipeline(start_date=None, end_date=None):
         reporter.save_html_report(quality_report)
 
         print("\n" + "="*50)
-        print("✅ PIPELINE EXECUTION FINISHED!")
+        print("[OK] PIPELINE EXECUTION FINISHED!")
         print(f"Final Dataset: data/processed/cleaned_data.csv")
         print("="*50 + "\n")
+        return quality_report
 
     except Exception as e:
-        print(f"\n[❌] PIPELINE FAILED: {str(e)}")
+        print(f"\n[FAIL] PIPELINE FAILED: {str(e)}")
+        return None
 
 if __name__ == "__main__":
     run_pipeline()

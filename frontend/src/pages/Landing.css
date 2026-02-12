@@ -1,0 +1,356 @@
+/* Typography - Poppins for all */
+.landing {
+  --font-head: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Poppins', system-ui, sans-serif;
+  --color-bg: #0a0c0f;
+  --color-surface: #111318;
+  --color-surface-2: #181c24;
+  --color-border: #252a33;
+  --color-text: #f0f2f5;
+  --color-muted: #8b92a0;
+  --color-accent: #e4a853;
+  --color-accent-dim: rgba(228, 168, 83, 0.15);
+  --color-accent-hover: #eab96a;
+}
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background */
+.landing-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 70%);
+}
+
+.landing-bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.25;
+}
+
+.landing-bg-glow-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-accent);
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.landing-bg-glow-2 {
+  width: 300px;
+  height: 300px;
+  background: #3b82f6;
+  bottom: 10%;
+  right: -80px;
+  opacity: 0.12;
+}
+
+/* Header */
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 1;
+}
+
+.landing-brand {
+  font-family: var(--font-head);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.landing-brand-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.landing-nav a {
+  color: var(--color-muted);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s, background 0.2s;
+}
+
+.landing-nav a:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
+/* Hero */
+.landing-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem 5rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.landing-eyebrow {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+  margin: 0 0 1.25rem;
+}
+
+.landing-title {
+  font-family: var(--font-head);
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+  max-width: 720px;
+}
+
+.landing-title-accent {
+  color: var(--color-accent);
+  display: inline-block;
+}
+
+.landing-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--color-muted);
+  max-width: 520px;
+  margin: 0 0 2rem;
+}
+
+.landing-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.landing-cta {
+  display: inline-block;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  padding: 0.9rem 1.75rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.landing-cta:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.landing-cta-hint {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.landing-dims {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+  max-width: 640px;
+}
+
+.landing-dim-pill {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.65rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-muted);
+  animation: landing-pill-fade 0.6s ease-out backwards;
+}
+
+@keyframes landing-pill-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Features */
+.landing-features {
+  padding: 4rem 2rem 5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.landing-features-title {
+  font-family: var(--font-head);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 2.5rem;
+  color: var(--color-text);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  border-color: rgba(228, 168, 83, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--color-text);
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Stats strip */
+.landing-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2.5rem 2rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .landing-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+}
+
+.landing-stat {
+  text-align: center;
+}
+
+.landing-stat-value {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.landing-stat-label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* Footer */
+.landing-footer {
+  padding: 1.75rem 2rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  position: relative;
+  z-index: 1;
+}
+
+.landing-footer p {
+  margin: 0;
+}

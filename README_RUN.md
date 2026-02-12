@@ -1,26 +1,51 @@
-# 🚀 How to Run the Gesix Project
+# How to Run the Gesix Project
 
-To avoid **501 Unsupported Method** errors, please follow these steps to run the project correctly.
+## React frontend + Flask backend (recommended)
 
-## 1. Start the Flask Server
-The project requires a Flask backend to process data. Do **NOT** use `python -m http.server`.
+### 1. Install dependencies
 
-Run this command in your terminal:
+**Backend (project root):**
+```bash
+pip install -r requirements.txt
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+```
+
+### 2. Start the backend
+From the **project root**:
 ```bash
 python app.py
 ```
+Backend runs at **http://localhost:8080** and exposes:
+- `GET /api/report` – latest quality report (JSON)
+- `POST /api/process` – run pipeline (JSON body: `start_date`, `end_date`)
 
-## 2. Access the Dashboard
-Once the server is running, open your web browser and go to:
-**[http://localhost:8080](http://localhost:8080)**
+### 3. Start the React frontend
+In a **second terminal**:
+```bash
+cd frontend
+npm run dev
+```
+Open **http://localhost:5173** (or the port Vite prints). You get:
+- **Landing page** (`/`) – intro and link to Dashboard
+- **Dashboard** (`/dashboard`) – run new analysis (date range + Process Data) and view trustability scores
 
-## 3. Process Data
-1. On the dashboard, locate the **"Run New Analysis"** section.
-2. Select a **Start Date** and **End Date**.
-3. Click **"🚀 Process Data"**.
-4. The backend will fetch and clean the data, then automatically redirect you back to the updated dashboard.
+The frontend proxies `/api` to the Flask server, so no CORS issues when using the dev server.
 
 ---
-**Troubleshooting:**
-* **Error 501:** You are likely running `python -m http.server`. Stop that process and run `python app.py` instead.
-* **Error 404:** Ensure you are in the project root directory before running `python app.py`.
+
+## Legacy: HTML dashboard only
+
+If you only want the static HTML dashboard:
+1. Run `python main.py` once (with date prompts) to generate `data/processed/dashboard.html`.
+2. Run `python app.py` and open **http://localhost:8080** to serve that HTML and use the form (POST `/process`).
+
+---
+
+**Troubleshooting**
+- **501 on POST:** Do not use `python -m http.server`. Use `python app.py` for the backend.
+- **Report not loading:** Run `python main.py` once to create `data/processed/cleaned_data.csv`, or use “Process Data” on the Dashboard with a date range.
