@@ -20,7 +20,13 @@ class DataValidator:
         df = pd.read_csv(file_path)
         total = len(df)
         if total == 0:
-            return None
+            return {
+                "total_records": 0,
+                "overall_trustability": 0.0,
+                "status": "No Data Found for this period",
+                "dimensions": {d: 0.0 for d in ["Completeness", "Accuracy", "Validity", "Consistency", "Uniqueness", "Integrity", "Lineage"]},
+                "issue_metadata": {"duplicate_indices": [], "integrity_fail_indices": []}
+            }
 
         # --- 7 DIMENSIONS CALCULATION ---
         
@@ -72,6 +78,7 @@ class DataValidator:
         report = {
             "total_records": total,
             "overall_trustability": round(overall_score, 2),
+            "status": "Success",
             "dimensions": {
                 "Completeness": round(dim_completeness, 2),
                 "Accuracy": round(dim_accuracy, 2),

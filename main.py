@@ -67,6 +67,7 @@ def run_pipeline():
         reporter = ReportGenerator()
         reporter.generate_summary(quality_report)
         reporter.save_report(quality_report)
+        reporter.save_html_report(quality_report)
 
         print("\n" + "="*50)
         print("✅ PIPELINE EXECUTION FINISHED!")
