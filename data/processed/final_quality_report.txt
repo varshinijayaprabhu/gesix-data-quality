@@ -1,0 +1,13 @@
+=== DATA TRUSTABILITY REPORT ===
+Timestamp: 1770884888.886944
+Total Rows: 30
+Overall Score: 78.1%
+
+--- Dimension Breakdown ---
+Completeness: 73.33%
+Accuracy: 43.33%
+Validity: 100.0%
+Consistency: 100.0%
+Uniqueness: 83.33%
+Integrity: 46.67%
+Lineage: 100.0%
