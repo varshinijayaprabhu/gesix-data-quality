@@ -1,31 +1,31 @@
 address,price,listed_date,source,ingested_at,remediation_notes
-101 Emerald Street,315000.0,2026-02-11,Zillow_API,2026-02-12T14:00:24.372378,
-102 Emerald Street,330000.0,2026-02-10,Zillow_API,2026-02-12T14:00:24.372396,
-103 Emerald Street,345000.0,2026-02-09,Zillow_API,2026-02-12T14:00:24.372400,
-104 Emerald Street,360000.0,2026-02-08,Zillow_API,2026-02-12T14:00:24.372403,
-105 Emerald Street,375000.0,2026-02-07,Zillow_API,2026-02-12T14:00:24.372406,
-106 Emerald Street,390000.0,2026-02-06,Zillow_API,2026-02-12T14:00:24.372409,
-107 Emerald Street,405000.0,2026-02-05,Zillow_API,2026-02-12T14:00:24.372411,
-108 Emerald Street,420000.0,2026-02-04,Zillow_API,2026-02-12T14:00:24.372414,
-109 Emerald Street,435000.0,2026-02-03,Zillow_API,2026-02-12T14:00:24.372416,
-110 Emerald Street,0.0,2026-02-02,Zillow_API,2026-02-12T14:00:24.372419,Price invalid or missing - flagged for review
-111 Emerald Street,465000.0,2026-02-01,Zillow_API,2026-02-12T14:00:24.372422,
-112 Emerald Street,480000.0,2026-01-31,Zillow_API,2026-02-12T14:00:24.372425,
-113 Emerald Street,495000.0,2026-01-30,Zillow_API,2026-02-12T14:00:24.372427,
-114 Emerald Street,510000.0,2026-01-29,Zillow_API,2026-02-12T14:00:24.372429,
-115 Emerald Street,,2026-01-28,Zillow_API,2026-02-12T14:00:24.372431,Price invalid or missing - flagged for review
-101 Emerald Street,,2026-02-11,City_Records,2026-02-12T14:00:24.377704,Price invalid or missing - flagged for review
-102 Emerald Street,,2026-02-10,City_Records,2026-02-12T14:00:24.377742,Price invalid or missing - flagged for review
-103 Emerald Street,,2026-02-09,City_Records,2026-02-12T14:00:24.377763,Price invalid or missing - flagged for review
-104 Emerald Street,,2026-02-08,City_Records,2026-02-12T14:00:24.377780,Price invalid or missing - flagged for review
-105 Emerald Street,,2026-02-07,City_Records,2026-02-12T14:00:24.377796,Price invalid or missing - flagged for review
-506 Marble Avenue,,2026-02-06,City_Records,2026-02-12T14:00:24.377810,Price invalid or missing - flagged for review
-507 Marble Avenue,,2026-02-05,City_Records,2026-02-12T14:00:24.377825,Price invalid or missing - flagged for review
-508 Marble Avenue,,2026-02-04,City_Records,2026-02-12T14:00:24.377839,Price invalid or missing - flagged for review
-509 Marble Avenue,,2026-02-03,City_Records,2026-02-12T14:00:24.377852,Price invalid or missing - flagged for review
-510 Marble Avenue,,2026-02-02,City_Records,2026-02-12T14:00:24.377866,Price invalid or missing - flagged for review
-511 Marble Avenue,,2026-02-01,City_Records,2026-02-12T14:00:24.377879,Price invalid or missing - flagged for review
-512 Marble Avenue,,2026-01-31,City_Records,2026-02-12T14:00:24.377893,Price invalid or missing - flagged for review
-513 Marble Avenue,,2026-01-30,City_Records,2026-02-12T14:00:24.377916,Price invalid or missing - flagged for review
-514 Marble Avenue,,2026-01-29,City_Records,2026-02-12T14:00:24.377933,Price invalid or missing - flagged for review
-515 Marble Avenue,,2026-01-28,City_Records,2026-02-12T14:00:24.377947,Price invalid or missing - flagged for review
+101 Emerald Street,315000.0,2026-02-11,Zillow_API,2026-02-12T14:12:32.908401,
+102 Emerald Street,330000.0,2026-02-10,Zillow_API,2026-02-12T14:12:32.908413,
+103 Emerald Street,345000.0,2026-02-09,Zillow_API,2026-02-12T14:12:32.908417,
+104 Emerald Street,360000.0,2026-02-08,Zillow_API,2026-02-12T14:12:32.908418,
+105 Emerald Street,375000.0,2026-02-07,Zillow_API,2026-02-12T14:12:32.908420,
+106 Emerald Street,390000.0,2026-02-06,Zillow_API,2026-02-12T14:12:32.908422,
+107 Emerald Street,405000.0,2026-02-05,Zillow_API,2026-02-12T14:12:32.908423,
+108 Emerald Street,420000.0,2026-02-04,Zillow_API,2026-02-12T14:12:32.908425,
+109 Emerald Street,435000.0,2026-02-03,Zillow_API,2026-02-12T14:12:32.908426,
+110 Emerald Street,0.0,2026-02-02,Zillow_API,2026-02-12T14:12:32.908427,Price invalid or missing - flagged for review
+111 Emerald Street,465000.0,2026-02-01,Zillow_API,2026-02-12T14:12:32.908429,
+112 Emerald Street,480000.0,2026-01-31,Zillow_API,2026-02-12T14:12:32.908431,
+113 Emerald Street,495000.0,2026-01-30,Zillow_API,2026-02-12T14:12:32.908432,
+114 Emerald Street,510000.0,2026-01-29,Zillow_API,2026-02-12T14:12:32.908434,
+115 Emerald Street,,2026-01-28,Zillow_API,2026-02-12T14:12:32.908435,Price invalid or missing - flagged for review
+101 Emerald Street,,2026-02-11,City_Records,2026-02-12T14:12:32.912210,Price invalid or missing - flagged for review
+102 Emerald Street,,2026-02-10,City_Records,2026-02-12T14:12:32.912240,Price invalid or missing - flagged for review
+103 Emerald Street,,2026-02-09,City_Records,2026-02-12T14:12:32.912259,Price invalid or missing - flagged for review
+104 Emerald Street,,2026-02-08,City_Records,2026-02-12T14:12:32.912276,Price invalid or missing - flagged for review
+105 Emerald Street,,2026-02-07,City_Records,2026-02-12T14:12:32.912301,Price invalid or missing - flagged for review
+506 Marble Avenue,,2026-02-06,City_Records,2026-02-12T14:12:32.912316,Price invalid or missing - flagged for review
+507 Marble Avenue,,2026-02-05,City_Records,2026-02-12T14:12:32.912331,Price invalid or missing - flagged for review
+508 Marble Avenue,,2026-02-04,City_Records,2026-02-12T14:12:32.912344,Price invalid or missing - flagged for review
+509 Marble Avenue,,2026-02-03,City_Records,2026-02-12T14:12:32.912357,Price invalid or missing - flagged for review
+510 Marble Avenue,,2026-02-02,City_Records,2026-02-12T14:12:32.912370,Price invalid or missing - flagged for review
+511 Marble Avenue,,2026-02-01,City_Records,2026-02-12T14:12:32.912383,Price invalid or missing - flagged for review
+512 Marble Avenue,,2026-01-31,City_Records,2026-02-12T14:12:32.912396,Price invalid or missing - flagged for review
+513 Marble Avenue,,2026-01-30,City_Records,2026-02-12T14:12:32.912410,Price invalid or missing - flagged for review
+514 Marble Avenue,,2026-01-29,City_Records,2026-02-12T14:12:32.912423,Price invalid or missing - flagged for review
+515 Marble Avenue,,2026-01-28,City_Records,2026-02-12T14:12:32.912437,Price invalid or missing - flagged for review
