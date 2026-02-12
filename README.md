@@ -19,20 +19,23 @@ The Data Quality & Trustability Framework is a comprehensive Python-based soluti
 - `data/raw/`: Archived raw responses for data lineage.
 - `data/processed/`: Unified and cleaned datasets.
 
-## � Meet the Team
+### 👥 Team & Contributions
 
-### Lead 1 (Project Architect & Primary Developer)
-Lead 1 is the core visionary and technical lead responsible for the foundation of the framework.
-- **Architecture Design**: Conceptualized and modularized the pipeline into decoupled Ingest-Unify-Remediate layers.
-- **Ingestion & Transformation**: Developed the multi-source `scraper.py` and the `converter.py` logic for universal schema mapping.
-- **Auto-Remediation Engine**: Engineered the `cleaner.py` module to handle deterministic address normalization and null flagging.
-- **Orchestration**: Developed the interactive `main.py` CLI, allowing for dynamic date-range filtering and pipeline control.
+#### **Lead 1: [Your Name/Role]**
+*   **Project Architect**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) architecture.
+*   **Ingestion Engine**: Developed `scraper.py` for multi-source property data acquisition.
+*   **Data Remediation**: Engineered `cleaner.py` for automated data sanitization and format standardization.
+*   **Orchestration**: Built the master `main.py` controller and interactive CLI.
 
-### Contributor 1 - Varshini (Workflow & Documentation Specialist)
-Varshini leads the project's collaboration strategy and professional documentation standards.
-- **Branching Strategy Lead**: Designed and implemented the professional `main -> distributable -> dev` Git workflow to ensure production stability.
-- **Documentation Architect**: Authored the comprehensive Project Guides, including `contributor_guide.md` and `branching_guide.md`.
-- **Quality Standards**: Responsible for maintaining the repository's professional structure and ensuring contributor compliance.
+#### **Contributor 1: Varshini Jayaprabhu**
+*   **Branching Strategy**: Designed the professional Git workflow (`main`, `distributable`, `dev/`).
+*   **Documentation Lead**: Authored the project roadmap and contributor guidelines.
+*   **QA Consultant**: Verified pipeline logic and integration stability.
+
+#### **Contributor 2: Sangu**
+*   **QA Engine**: Implemented the **7-Dimensional Trustability Framework** (Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, Lineage).
+*   **Reporting Layer**: Developed the `generator.py` dashboard for executive quality summaries.
+*   **Trustability Scoring**: Engineered the percentage-based data health scoring algorithm.
 
 ## 🚦 Getting Started
 
