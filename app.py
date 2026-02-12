@@ -18,9 +18,13 @@ def index():
 from flask import request, redirect, url_for
 from main import run_pipeline
 
-@app.route('/process', methods=['POST'])
+@app.route('/process', methods=['GET', 'POST'])
 def process():
     """Triggers the data pipeline with user-provided dates."""
+    if request.method == 'GET':
+        # Redirect back to index if accessed via GET (e.g. refresh or direct URL)
+        return redirect(url_for('index'))
+    
     start_date = request.form.get('start_date')
     end_date = request.form.get('end_date')
     
@@ -33,7 +37,10 @@ def process():
 
 if __name__ == '__main__':
     print("\n" + "="*50)
-    print("🚀 Gesix Web Server Starting...")
-    print(f"🔗 Local URL: http://localhost:8080")
+    print("🚀 Gesix Data Quality Web Server")
+    print("="*50)
+    print(f"🔗 URL: http://localhost:8080")
+    print("[!] IMPORTANT: Use this server (app.py) to access the dashboard.")
+    print("[!] Do NOT use 'python -m http.server' as it will cause 501 errors.")
     print("="*50 + "\n")
     app.run(debug=True, host='localhost', port=8080)
