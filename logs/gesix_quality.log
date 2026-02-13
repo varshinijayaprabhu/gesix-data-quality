@@ -1,2 +1,28 @@
 2026-02-13 11:38:01,148 INFO: Gesix Quality App Startup [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:29]
 2026-02-13 11:38:01,248 INFO: Starting Waitress on 0.0.0.0:8080 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:142]
+2026-02-13 19:36:40,491 INFO: Gesix Quality App Startup [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:28]
+2026-02-13 19:36:40,579 INFO: Starting Waitress on 0.0.0.0:8080 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:141]
+2026-02-13 19:37:52,562 ERROR: Exception on /api/report [GET] [in C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py:875]
+Traceback (most recent call last):
+  File "C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Varshini J\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py", line 77, in api_report
+    if report.get("error"):
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+2026-02-13 19:38:12,073 INFO: API trigger: Processing data from 2025-12-13 to 2026-02-13 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:101]
+2026-02-13 19:46:26,427 INFO: Gesix Quality App Startup [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:28]
+2026-02-13 19:46:26,505 INFO: Starting Waitress on 0.0.0.0:8080 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:156]
+2026-02-13 19:53:16,945 INFO: Gesix Quality App Startup [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:28]
+2026-02-13 19:53:17,038 INFO: Starting Waitress on 0.0.0.0:8080 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:157]
+2026-02-13 19:54:15,088 INFO: API trigger: Processing data from 2025-12-13 to 2026-02-13 [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\app.py:101]
