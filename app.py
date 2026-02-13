@@ -124,6 +124,21 @@ def index():
         return "Legacy dashboard not found."
 
 
+@app.errorhandler(404)
+@app.route("/<path:path>")
+def catch_all(path=None):
+    """Catch-all route to serve index.html for React SPA routing."""
+    # If the path looks like a file (has an extension), try to serve it or return 404
+    if path and "." in path:
+        return send_from_directory(app.static_folder, path)
+    
+    # Otherwise, serve the main index.html for any other route (Dashboard, etc.)
+    if os.path.exists(os.path.join(app.static_folder, "index.html")):
+        return send_from_directory(app.static_folder, "index.html")
+    else:
+        return "<h1>Dashboard not found</h1><p>Ensure the frontend is built: <code>cd frontend && npm run build</code></p>", 404
+
+
 if __name__ == "__main__":
     from waitress import serve
     port = int(os.environ.get("PORT", 8080))
