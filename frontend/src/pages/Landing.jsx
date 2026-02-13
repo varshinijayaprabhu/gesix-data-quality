@@ -4,8 +4,19 @@ import './Landing.css';
 export default function Landing() {
   const dimensions = ['Completeness', 'Accuracy', 'Validity', 'Consistency', 'Uniqueness', 'Integrity', 'Lineage'];
 
+  const dimensionDetails = [
+    { name: 'Completeness', desc: 'No missing fields; coverage across required attributes.', icon: '✓' },
+    { name: 'Accuracy', desc: 'Values match real-world facts and reference data.', icon: '◎' },
+    { name: 'Validity', desc: 'Format and rules compliance (dates, numbers, enums).', icon: '◇' },
+    { name: 'Consistency', desc: 'Aligned across sources and time with no contradictions.', icon: '≡' },
+    { name: 'Uniqueness', desc: 'No unintended duplicates; clear entity resolution.', icon: '1' },
+    { name: 'Integrity', desc: 'Referential and structural relationships hold.', icon: '⟷' },
+    { name: 'Lineage', desc: 'Full traceability from source to output.', icon: '→' },
+  ];
+
   return (
     <div className="landing">
+      <a href="#how-it-works" className="landing-skip">Skip to content</a>
       <div className="landing-bg" aria-hidden="true">
         <div className="landing-bg-grid" />
         <div className="landing-bg-glow landing-bg-glow-1" />
@@ -46,10 +57,12 @@ export default function Landing() {
             </span>
           ))}
         </div>
+        <a href="#how-it-works" className="landing-scroll-hint">Explore</a>
       </main>
 
-      <section className="landing-features">
+      <section id="how-it-works" className="landing-features">
         <h2 className="landing-features-title">How it works</h2>
+        <span className="landing-title-underline" aria-hidden="true" />
         <div className="features-grid">
           <div className="feature-card feature-card-1">
             <span className="feature-icon" aria-hidden="true">1</span>
@@ -74,6 +87,23 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="landing-dimensions" aria-labelledby="dimensions-heading">
+        <h2 id="dimensions-heading" className="landing-section-title">The seven dimensions</h2>
+        <span className="landing-title-underline" aria-hidden="true" />
+        <p className="landing-section-subtitle">
+          Each dimension is scored in a single pass so you get a complete trustability picture.
+        </p>
+        <div className="dimensions-grid">
+          {dimensionDetails.map((d, i) => (
+            <div key={d.name} className="dimension-card" style={{ animationDelay: `${i * 0.06}s` }}>
+              <span className="dimension-icon" aria-hidden="true">{d.icon}</span>
+              <h3>{d.name}</h3>
+              <p>{d.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="landing-stats">
         <div className="landing-stat">
           <span className="landing-stat-value">7</span>
@@ -89,8 +119,24 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="landing-cta-section">
+        <p className="landing-cta-section-text">Ready to improve your data trustability?</p>
+        <Link to="/dashboard" className="landing-cta landing-cta-secondary">Open Dashboard</Link>
+      </section>
+
       <footer className="landing-footer">
-        <p>Gesix Data Quality Framework</p>
+        <div className="landing-footer-inner">
+          <Link to="/" className="landing-footer-brand">
+            <span className="landing-brand-mark">G</span>
+            <span>Gesix</span>
+          </Link>
+          <nav className="landing-footer-nav">
+            <Link to="/dashboard">Dashboard</Link>
+            <span className="landing-footer-sep">·</span>
+            <span className="landing-footer-muted">Data Quality Framework</span>
+          </nav>
+        </div>
+        <p className="landing-footer-copy">© {new Date().getFullYear()} Gesix. One framework, seven dimensions.</p>
       </footer>
     </div>
   );
