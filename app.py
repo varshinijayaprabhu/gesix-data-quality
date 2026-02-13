@@ -2,12 +2,31 @@ from flask import Flask, request, redirect, url_for, send_from_directory, jsonif
 from flask_cors import CORS
 import os
 import sys
+import logging
+from logging.handlers import RotatingFileHandler
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Allow importing qa.validator (same as main.py)
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
 CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"])
+
+# Setup Logging
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+logging.basicConfig(level=logging.INFO)
+file_handler = RotatingFileHandler("logs/gesix_quality.log", maxBytes=10240, backupCount=10)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+))
+file_handler.setLevel(logging.INFO)
+app.logger.addHandler(file_handler)
+app.logger.info("Gesix Quality App Startup")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.join(BASE_DIR, "data", "raw")
@@ -39,16 +58,17 @@ def get_report_json():
         report = validator.validate(CLEANED_CSV)
         return report
     except Exception as e:
+        app.logger.error(f"Validation Error: {e}")
         return {"error": str(e), "status": "Error", "total_records": 0, "overall_trustability": 0, "dimensions": {}}
 
 
 @app.route("/")
-def index():
-    """Serve legacy HTML dashboard if requested from same origin; API is used by React."""
-    try:
-        return send_from_directory(PROCESSED_DIR, "dashboard.html")
-    except Exception:
-        return "<h1>Dashboard not found</h1><p>Run the pipeline first: <code>python main.py</code></p>"
+def serve_frontend():
+    """Serve the React production build's index.html."""
+    if os.path.exists(os.path.join(app.static_folder, "index.html")):
+        return send_from_directory(app.static_folder, "index.html")
+    else:
+        return "<h1>Dashboard not found</h1><p>Ensure the frontend is built: <code>cd frontend && npm run build</code></p>"
 
 
 @app.route("/api/report", methods=["GET"])
@@ -79,7 +99,7 @@ def api_process():
     if not start_date or not end_date:
         return jsonify({"success": False, "error": "start_date and end_date are required"}), 400
 
-    print(f"[*] API trigger: Processing data from {start_date} to {end_date}")
+    app.logger.info(f"API trigger: Processing data from {start_date} to {end_date}")
     try:
         from main import run_pipeline
         report = run_pipeline(start_date=start_date, end_date=end_date)
@@ -92,35 +112,32 @@ def api_process():
             "raw_data": raw_data,
         })
     except Exception as e:
+        app.logger.error(f"Pipeline Execution Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route("/process", methods=["GET", "POST"])
-def process():
-    """Legacy form POST: redirect to index after running pipeline."""
-    if request.method == "GET":
-        return redirect(url_for("index"))
-
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
-    if not start_date or not end_date:
-        return redirect(url_for("index"))
-
-    print(f"[*] Web Server trigger: Processing data from {start_date} to {end_date}")
+@app.route("/legacy-dashboard")
+def index():
+    """Serve legacy HTML dashboard if requested."""
     try:
-        from main import run_pipeline
-        run_pipeline(start_date=start_date, end_date=end_date)
-        return redirect(url_for("index"))
-    except Exception as e:
-        return f"<h1>Pipeline Error</h1><p>{e}</p><a href='/'>Go Back</a>", 500
+        return send_from_directory(PROCESSED_DIR, "dashboard.html")
+    except Exception:
+        return "Legacy dashboard not found."
 
 
 if __name__ == "__main__":
+    from waitress import serve
+    port = int(os.environ.get("PORT", 8080))
+    host = os.environ.get("HOST", "0.0.0.0")
+    debug = os.environ.get("DEBUG", "False").lower() == "true"
+
     print("\n" + "=" * 50)
-    print("Gesix Data Quality Web Server")
-    print("=" * 50)
-    print("API: http://localhost:8080/api/report  (GET)")
-    print("API: http://localhost:8080/api/process (POST JSON: start_date, end_date)")
-    print("React dev: run 'npm run dev' in frontend/ and use http://localhost:5173")
+    print(f"Gesix Data Quality Production Server")
+    print(f"Running on http://{host}:{port}")
     print("=" * 50 + "\n")
-    app.run(debug=True, host="0.0.0.0", port=8080)
+
+    if debug:
+        app.run(debug=True, host=host, port=port)
+    else:
+        app.logger.info(f"Starting Waitress on {host}:{port}")
+        serve(app, host=host, port=port)

@@ -5,7 +5,7 @@
 --- EXECUTIVE SUMMARY ---
 This report provides a comprehensive analysis of the real estate dataset using the 7 Dimensions of Trustability. Our framework evaluates records for Completeness (missing data), Accuracy (value realism), Validity (format compliance), Consistency (logical coherence), Uniqueness (duplicate reduction), Integrity (schema adherence), and Lineage (data origin). A high Trustability Score ensures that the data is reliable for AI-driven insights.
 
-Total Records Processed: 14
+Total Records Processed: 28
 Overall Trustability:    98.98%
 
 --- DIMENSION BREAKDOWN & REASONING ---

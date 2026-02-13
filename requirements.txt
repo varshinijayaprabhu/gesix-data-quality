@@ -5,3 +5,5 @@ great_expectations==1.11.3
 pytest==9.0.2
 flask==3.0.3
 flask-cors==5.0.0
+waitress==3.0.2
+python-dotenv==1.0.1
