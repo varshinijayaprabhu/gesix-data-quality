@@ -1,50 +1,43 @@
-# Data Quality & Trustability Framework
+# Data Quality & Trustability Framework - Frontend & API Integration
 
-The Data Quality & Trustability Framework is a comprehensive Python-based solution designed to solve the critical problem of fragmented real estate data. By integrating multiple sources such as Zillow-simulated APIs and city record scrapers, it creates a unified source of truth for property analysis. The framework employs sophisticated remediation logic to automatically fix address inconsistencies and flag missing data points, ensuring high integrity for downstream AI models. It features a modular architecture that separates ingestion, quality assurance, and remediation into distinct, maintainable layers. Ultimately, this system provides the foundation for trustworthy data-driven decision-making in the competitive real estate market.
+This branch focuses on the **Frontend Visualization** and **API Infrastructure** for the Gesix Data Quality platform. It provides a modern React-based interface for interacting with the data quality pipeline and an asynchronous backend server to manage data processing.
 
-## 🚀 Key Features
-- **Multi-Source Ingestion**: Supports API (Zillow-sim), Scraped City Records, and User Uploads.
-- **Unified Data Schema**: Converts disparate JSON and HTML data into a standardized CSV format.
-- **Auto-Remediation**: Normalizes addresses and flags missing/invalid data points.
-- **Interactive Pipeline**: Dynamic date range filtering for targeted data analysis.
+## 🚀 Key Features (dev/dinesh)
+- **React Dashboard**: A modern frontend for visualizing trustability metrics and data health.
+- **Flask API Layer**: An asynchronous backend providing endpoints for data retrieval and pipeline execution.
+- **CORS-Enabled Framework**: Seamless communication between the decoupled frontend and backend.
+- **Dynamic Processing TRigger**: Ability to trigger data ingestion and QA cycles directly from the web interface.
 
 ## 🛠️ Tech Stack
-- **Language**: Python 3.x
-- **Libraries**: Pandas, BeautifulSoup4, Requests
-- **Architecture**: Modular Backend (Ingestion, QA, Remediation Layers)
+- **Frontend**: React (Vite), CSS3, JavaScript (ES6+), React Router
+- **Backend**: Flask, Flask-CORS
+- **Build Tools**: npm, Vite
 
-## 📁 Project Structure
-- `src/ingestion/`: Scrapers and format converters.
-- `src/remediation/`: Data cleaning and auto-fix logic.
-- `data/raw/`: Archived raw responses for data lineage.
-- `data/processed/`: Unified and cleaned datasets.
+## 📁 Branch Structure
+- `frontend/`: Full React application including source files and build configurations.
+- `app.py`: Flask backend server implementing the API endpoints.
+- `requirements.txt`: Updated dependencies for web and cross-origin support.
 
-### 👥 Team & Contributions
+### 👥 Contributor: Dinesh
+*   **Web Infrastructure Lead**: Built the React-based frontend application from scratch.
+*   **API Architect**: Developed the Flask backend (`app.py`) to bridge the data pipeline with the web UI.
+*   **Integration Expert**: Implemented cross-origin support and API-driven pipeline triggers.
+*   **UI/UX Developer**: Designed the initial dashboard components for data visualization.
 
-#### **Lead: Varshini J**
-*   **Project Architect**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) architecture.
-*   **Ingestion Engine**: Developed `scraper.py` for multi-source property data acquisition.
-*   **Data Remediation**: Engineered `cleaner.py` for automated data sanitization and format standardization.
-*   **Orchestration**: Built the master `main.py` controller and interactive CLI.
+## 🚦 Getting Started (Local Development)
 
-#### **Person 1: Varshini J**
-*   **Branching Strategy**: Designed the professional Git workflow (`main`, `distributable`, `dev/`).
-*   **Documentation Lead**: Authored the project roadmap and contributor guidelines.
-*   **QA Consultant**: Verified pipeline logic and integration stability.
-
-#### **Person 2: Sangappa Arjun Malakappanavar**
-*   **QA Engine**: Implemented the **7-Dimensional Trustability Framework** (Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, Lineage).
-*   **Reporting Layer**: Developed the `generator.py` dashboard for executive quality summaries.
-*   **Trustability Scoring**: Engineered the percentage-based data health scoring algorithm.
-
-## 🚦 Getting Started
-
-1. **Install Dependencies**:
+1. **Backend**:
    ```bash
    pip install -r requirements.txt
+   python app.py
    ```
 
-2. **Run the Pipeline**:
+2. **Frontend**:
    ```bash
-   python main.py
+   cd frontend
+   npm install
+   npm run dev
    ```
+
+---
+*This branch focuses specifically on the interaction layer of the Gesix Data Quality project.*
