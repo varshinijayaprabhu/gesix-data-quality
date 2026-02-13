@@ -6,10 +6,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Allow importing qa.validator (same as main.py)
+# Allow importing src modules
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
 app = Flask(__name__, static_folder="frontend/dist", static_url_path="")

@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Adding src to path so we can import our modules
+# Set up module path
 sys.path.append(os.path.join(os.getcwd(), "src"))
 
 from ingestion.scraper import PropertyIngestor
@@ -10,7 +10,7 @@ from remediation.cleaner import DataCleaner
 
 def run_pipeline(start_date=None, end_date=None):
     print("\n" + "="*50)
-    print("      REAL ESTATE DATA QUALITY PIPELINE (MEMBER 1)")
+    print("      REAL ESTATE DATA QUALITY PIPELINE")
     print("="*50 + "\n")
 
     try:

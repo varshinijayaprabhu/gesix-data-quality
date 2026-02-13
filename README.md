@@ -1,50 +1,65 @@
-# Data Quality & Trustability Framework
+# Gesix Data Quality & Trustability Framework
 
-The Data Quality & Trustability Framework is a comprehensive Python-based solution designed to solve the critical problem of fragmented real estate data. By integrating multiple sources such as Zillow-simulated APIs and city record scrapers, it creates a unified source of truth for property analysis. The framework employs sophisticated remediation logic to automatically fix address inconsistencies and flag missing data points, ensuring high integrity for downstream AI models. It features a modular architecture that separates ingestion, quality assurance, and remediation into distinct, maintainable layers. Ultimately, this system provides the foundation for trustworthy data-driven decision-making in the competitive real estate market.
+The **Gesix Data Quality & Trustability Framework** is a production-grade solution designed to solve the critical problem of fragmented and unreliable real estate data. By integrating multiple sources—including Zillow-simulated APIs and city record scrapers—it creates a unified, high-integrity source of truth for property analysis.
+
+The framework employs sophisticated **auto-remediation logic** to normalize addresses and fix inconsistencies, validated by a rigorous **7-Dimensional Trustability Engine**. It features a modern decoupled architecture with a Python/Flask backend and an interactive React frontend, providing stakeholders with real-time visibility into data health and integrity.
 
 ## 🚀 Key Features
-- **Multi-Source Ingestion**: Supports API (Zillow-sim), Scraped City Records, and User Uploads.
-- **Unified Data Schema**: Converts disparate JSON and HTML data into a standardized CSV format.
-- **Auto-Remediation**: Normalizes addresses and flags missing/invalid data points.
-- **Interactive Pipeline**: Dynamic date range filtering for targeted data analysis.
+- **Modern Full-Stack Architecture**: Decoupled React frontend and Flask-powered API.
+- **Multi-Source Ingestion**: Unified processing of API responses (JSON), Scraped records (HTML), and legacy CSVs.
+- **7-Dimensional QA**: Automated validation for Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, and Lineage.
+- **Auto-Remediation Engine**: Intelligent address normalization and data sanitization.
+- **Production Ready**: Served via Waitress WSGI with integrated logging and environment configuration.
 
 ## 🛠️ Tech Stack
-- **Language**: Python 3.x
-- **Libraries**: Pandas, BeautifulSoup4, Requests
-- **Architecture**: Modular Backend (Ingestion, QA, Remediation Layers)
+- **Backend**: Python 3.10+, Flask, Waitress, Pandas, BeautifulSoup4
+- **Frontend**: React (Vite), JavaScript (ES6+), Modern CSS
+- **DevOps**: Dotenv configuration, Git Flow branching, Modular Architecture
 
-## 📁 Project Structure
-- `src/ingestion/`: Scrapers and format converters.
-- `src/remediation/`: Data cleaning and auto-fix logic.
-- `data/raw/`: Archived raw responses for data lineage.
-- `data/processed/`: Unified and cleaned datasets.
+---
 
-### 👥 Team & Contributions
+## 👥 Team & Contributions
 
-#### **Lead: Varshini J**
-*   **Project Architect**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) architecture.
-*   **Ingestion Engine**: Developed `scraper.py` for multi-source property data acquisition.
-*   **Data Remediation**: Engineered `cleaner.py` for automated data sanitization and format standardization.
-*   **Orchestration**: Built the master `main.py` controller and interactive CLI.
+### **Varshini J | Lead & Architect**
+*   **System Architecture**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) engine.
+*   **Ingestion Engine**: Developed the multi-source property data scraper (`scraper.py`).
+*   **Data Remediation**: Engineered the automated address normalization and sanitization logic (`cleaner.py`).
+*   **Pipeline Orchestration**: Built the master controller (`main.py`) for the core data lifecycle.
+*   **Project Strategy**: Established the professional Git workflow and documentation standards.
 
-#### **Person 1: Varshini J**
-*   **Branching Strategy**: Designed the professional Git workflow (`main`, `distributable`, `dev/`).
-*   **Documentation Lead**: Authored the project roadmap and contributor guidelines.
-*   **QA Consultant**: Verified pipeline logic and integration stability.
+### **Sangappa Arjun Malakappanavar | QA Specialist**
+*   **7-Dimensional Framework**: Implemented the core validation engine to measure data health across 7 critical dimensions.
+*   **Trustability Scoring**: Developed the algorithm for generating percentage-based data health scores.
+*   **Dashboard Generator**: Engineered the backend reporting layer (`generator.py`) for quality summaries.
 
-#### **Person 2: Sangappa Arjun Malakappanavar**
-*   **QA Engine**: Implemented the **7-Dimensional Trustability Framework** (Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, Lineage).
-*   **Reporting Layer**: Developed the `generator.py` dashboard for executive quality summaries.
-*   **Trustability Scoring**: Engineered the percentage-based data health scoring algorithm.
+### **Dinesh | Full-Stack Engineer**
+*   **Web Infrastructure**: Built the React frontend application using Vite for a modern dashboard experience.
+*   **API Architecture**: Developed the Flask backend (`app.py`) to bridge the core pipeline with the web UI.
+*   **System Integration**: Implemented CORS support and interactive API-driven pipeline triggers.
 
-## 🚦 Getting Started
+### **Shreyas | UI/UX Designer**
+*   **UI Refinement**: Led the visual enhancement of the Landing and Dashboard pages for a premium feel.
+*   **Design System**: Developed the custom CSS architecture and responsive layout components.
+*   **Experience Optimization**: Focused on cohesive design language and smooth user transitions.
 
-1. **Install Dependencies**:
+---
+
+## 🚦 Quick Start
+
+1. **Setup Environment**:
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Run the Pipeline**:
+2. **Initialize Config**:
    ```bash
-   python main.py
+   cp .env.example .env
    ```
+
+3. **Run Production Server**:
+   ```bash
+   python app.py
+   ```
+   Access the dashboard at `http://localhost:8080`.
+
+*Refer to [DEPLOYMENT.md](file:///c:/Users/Varshini%20J/Desktop/project%203%20-%20gesix%20solutions/DEPLOYMENT.md) for full deployment and build instructions.*
