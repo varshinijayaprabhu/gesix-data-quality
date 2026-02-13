@@ -1,50 +1,39 @@
-# Data Quality & Trustability Framework
+# Data Quality & Trustability Framework - UI Design & User Experience
 
-The Data Quality & Trustability Framework is a comprehensive Python-based solution designed to solve the critical problem of fragmented real estate data. By integrating multiple sources such as Zillow-simulated APIs and city record scrapers, it creates a unified source of truth for property analysis. The framework employs sophisticated remediation logic to automatically fix address inconsistencies and flag missing data points, ensuring high integrity for downstream AI models. It features a modular architecture that separates ingestion, quality assurance, and remediation into distinct, maintainable layers. Ultimately, this system provides the foundation for trustworthy data-driven decision-making in the competitive real estate market.
+This branch focuses on the **Frontend UI Refinement** and **User Experience** for the Gesix Data Quality platform. It includes polished design components and layout improvements for the landing and dashboard pages.
 
-## 🚀 Key Features
-- **Multi-Source Ingestion**: Supports API (Zillow-sim), Scraped City Records, and User Uploads.
-- **Unified Data Schema**: Converts disparate JSON and HTML data into a standardized CSV format.
-- **Auto-Remediation**: Normalizes addresses and flags missing/invalid data points.
-- **Interactive Pipeline**: Dynamic date range filtering for targeted data analysis.
+## 🎨 Key Features (dev/shreyas)
+- **Enhanced Landing Page**: Refined UI components for a professional and modern look.
+- **Improved Styling**: Custom CSS layout improvements and responsive design tweaks.
+- **UI Architecture**: Implementation of clean, modular JSX components for the presentation layer.
+- **Polished UX**: Focus on smooth transitions and a cohesive design language across the web portal.
 
 ## 🛠️ Tech Stack
-- **Language**: Python 3.x
-- **Libraries**: Pandas, BeautifulSoup4, Requests
-- **Architecture**: Modular Backend (Ingestion, QA, Remediation Layers)
+- **Frontend**: React, CSS3 (Modern Flexbox/Grid)
+- **Design**: Component-based UI architecture
 
-## 📁 Project Structure
-- `src/ingestion/`: Scrapers and format converters.
-- `src/remediation/`: Data cleaning and auto-fix logic.
-- `data/raw/`: Archived raw responses for data lineage.
-- `data/processed/`: Unified and cleaned datasets.
+## 📁 Branch Structure
+- `frontend/src/pages/Landing.jsx`: Updated layout and structure for the initial web entry point.
+- `frontend/src/pages/Landing.css`: Custom styling for high-quality visual presentation.
 
-### 👥 Team & Contributions
+### 👥 Contributor: Shreyas
+*   **UI/UX Designer**: Led the visual enhancement of the project's web interface.
+*   **Frontend Developer**: Implemented reactive UI components with a focus on modern aesthetics.
+*   **Layout Architect**: Refined the CSS architecture to ensure professional styling and responsiveness.
+*   **Design Specialist**: Polished the Landing page to improve the first-touch user experience.
 
-#### **Lead: Varshini J**
-*   **Project Architect**: Designed the modular E-T-L-Q (Extract, Transform, Load, Quality) architecture.
-*   **Ingestion Engine**: Developed `scraper.py` for multi-source property data acquisition.
-*   **Data Remediation**: Engineered `cleaner.py` for automated data sanitization and format standardization.
-*   **Orchestration**: Built the master `main.py` controller and interactive CLI.
+## 🚦 Getting Started (Local Development)
 
-#### **Person 1: Varshini J**
-*   **Branching Strategy**: Designed the professional Git workflow (`main`, `distributable`, `dev/`).
-*   **Documentation Lead**: Authored the project roadmap and contributor guidelines.
-*   **QA Consultant**: Verified pipeline logic and integration stability.
-
-#### **Person 2: Sangappa Arjun Malakappanavar**
-*   **QA Engine**: Implemented the **7-Dimensional Trustability Framework** (Completeness, Accuracy, Validity, Consistency, Uniqueness, Integrity, Lineage).
-*   **Reporting Layer**: Developed the `generator.py` dashboard for executive quality summaries.
-*   **Trustability Scoring**: Engineered the percentage-based data health scoring algorithm.
-
-## 🚦 Getting Started
-
-1. **Install Dependencies**:
+1. **Setup**:
    ```bash
-   pip install -r requirements.txt
+   cd frontend
+   npm install
    ```
 
-2. **Run the Pipeline**:
+2. **Run Dev Server**:
    ```bash
-   python main.py
+   npm run dev
    ```
+
+---
+*This branch focuses specifically on the visual and experiential layer of the Gesix Data Quality project.*
