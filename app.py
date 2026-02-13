@@ -74,8 +74,8 @@ def serve_frontend():
 def api_report():
     """Return latest quality report as JSON for the React frontend."""
     report = get_report_json()
-    if report.get("error"):
-        return jsonify(report), 500
+    if not report or report.get("error"):
+        return jsonify(report or {"error": "Report not found"}), 500
     return jsonify(report)
 
 
@@ -147,7 +147,8 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 50)
     print(f"Gesix Data Quality Production Server")
-    print(f"Running on http://{host}:{port}")
+    print(f"Local Access: http://localhost:{port}")
+    print(f"Network Access: http://{host}:{port}")
     print("=" * 50 + "\n")
 
     if debug:
