@@ -2,8 +2,7 @@ from flask import Flask, request, redirect, url_for, send_from_directory, jsonif
 from flask_cors import CORS
 import os
 import sys
-import logging
-from logging.handlers import RotatingFileHandler
+
 from dotenv import load_dotenv
 from main import run_pipeline
 
@@ -15,18 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src
 app = Flask(__name__, static_folder="../frontend/dist", static_url_path="")
 CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"])
 
-# Setup Logging
-if not os.path.exists("logs"):
-    os.makedirs("logs")
-
-logging.basicConfig(level=logging.INFO)
-file_handler = RotatingFileHandler("logs/gesix_quality.log", maxBytes=10240, backupCount=10)
-file_handler.setFormatter(logging.Formatter(
-    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-))
-file_handler.setLevel(logging.INFO)
-app.logger.addHandler(file_handler)
-app.logger.info("Gesix Quality App Startup")
+# Logging framework removed as requested
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.join(BASE_DIR, "data", "raw")
@@ -81,7 +69,7 @@ def get_report_json():
         report = validator.validate(CLEANED_PARQUET)
         return report
     except Exception as e:
-        app.logger.error(f"Validation Error: {e}")
+        print(f"Validation Error: {e}")
         return {"error": str(e), "status": "Error", "total_records": 0, "overall_trustability": 0, "dimensions": {}}
 
 
@@ -137,9 +125,9 @@ def api_process():
             os.makedirs(temp_dir)
         file_path = os.path.join(temp_dir, file.filename)
         file.save(file_path)
-        app.logger.info(f"File uploaded to {file_path}")
+        print(f"File uploaded to {file_path}")
 
-    app.logger.info(f"API trigger: Source={source_type}, URL={source_url}, Dates={start_date} to {end_date}")
+    print(f"API trigger: Source={source_type}, URL={source_url}, Dates={start_date} to {end_date}")
     
     try:
         report = run_pipeline(
@@ -172,14 +160,14 @@ def api_process():
             "error": report.get("error") if not is_success else None
         }
         
-        app.logger.info(f"API Response: Success={is_success}, Status={status}")
+        print(f"API Response: Success={is_success}, Status={status}")
         if not is_success:
-             app.logger.error(f"API Error Details: {response_data.get('error') or report}")
+             print(f"API Error Details: {response_data.get('error') or report}")
              
         return jsonify(response_data)
     except Exception as e:
         import traceback
-        app.logger.error(f"Pipeline Execution Error: {e}\n{traceback.format_exc()}")
+        print(f"Pipeline Execution Error: {e}\n{traceback.format_exc()}")
         return jsonify({"success": False, "error": f"CANARY ERROR: {str(e)}"}), 500
     finally:
         # Cleanup temp file if it exists
@@ -229,5 +217,5 @@ if __name__ == "__main__":
     if debug:
         app.run(debug=True, host=host, port=port)
     else:
-        app.logger.info(f"Starting Waitress on {host}:{port}")
+        print(f"Starting Waitress on {host}:{port}")
         serve(app, host=host, port=port)

@@ -1,2 +1,0 @@
-2026-02-22 16:34:28,498 INFO: API Response: Success=False, Status=No Data Found for this period [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\backend\app.py:275]
-2026-02-22 16:34:28,504 ERROR: API Error Details: {'status': 'No Data Found for this period', 'total_records': 0, 'overall_trustability': 0, 'dimensions': {}} [in C:\Users\Varshini J\Desktop\project 3 - gesix solutions\backend\app.py:277]
