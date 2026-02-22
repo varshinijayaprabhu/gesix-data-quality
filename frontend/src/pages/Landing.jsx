@@ -41,7 +41,7 @@ export default function Landing() {
           <span className="landing-title-accent">Seven dimensions.</span>
         </h1>
         <p className="landing-subtitle">
-          Ingest, unify, and remediate real estate data with a rigorous
+          Ingest, unify, and remediate any dataset with a rigorous
           quality engine—built for reliable AI and analytics.
         </p>
         <div className="landing-cta-wrap">
@@ -66,13 +66,13 @@ export default function Landing() {
         <div className="features-grid">
           <div className="feature-card feature-card-1">
             <span className="feature-icon" aria-hidden="true">1</span>
-            <h3>Ingestion</h3>
-            <p>API and city records with date-range filtering and raw archival for full lineage.</p>
+            <h3>Universal Ingestion</h3>
+            <p>API, Web portal, and custom CSV uploads with raw archival for full lineage.</p>
           </div>
           <div className="feature-card feature-card-2">
             <span className="feature-icon" aria-hidden="true">2</span>
             <h3>Unify & Clean</h3>
-            <p>Single schema, address normalization, and smart handling of missing or invalid prices.</p>
+            <p>Dynamic schema alignment, statistical normalization, and smart handling of outliers.</p>
           </div>
           <div className="feature-card feature-card-3">
             <span className="feature-icon" aria-hidden="true">3</span>
@@ -82,7 +82,7 @@ export default function Landing() {
           <div className="feature-card feature-card-4">
             <span className="feature-icon" aria-hidden="true">4</span>
             <h3>Dashboard & Export</h3>
-            <p>Run new analysis, view trustability scores, and download reports as PDF.</p>
+            <p>Run new analysis on any dataset, view trustability scores, and download reports.</p>
           </div>
         </div>
       </section>

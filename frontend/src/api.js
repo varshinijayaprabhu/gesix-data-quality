@@ -9,12 +9,22 @@ export async function getReport() {
   return res.json();
 }
 
-export async function processData(startDate, endDate) {
+export async function processData(options) {
+  const { sourceType, sourceUrl, startDate, endDate, file, apiKey } = options;
+  
+  const formData = new FormData();
+  formData.append('source_type', sourceType);
+  if (sourceUrl) formData.append('source_url', sourceUrl);
+  if (startDate) formData.append('start_date', startDate);
+  if (endDate) formData.append('end_date', endDate);
+  if (apiKey) formData.append('api_key', apiKey);
+  if (file) formData.append('file', file);
+
   const res = await fetch(`${API_BASE}/process`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ start_date: startDate, end_date: endDate }),
+    body: formData, // fetch automatically sets Content-Type for FormData
   });
+  
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.error || res.statusText || 'Process failed');
@@ -27,6 +37,6 @@ export async function processData(startDate, endDate) {
 
 export async function getRawData() {
   const res = await fetch(`${API_BASE}/raw-data`);
-  const data = await res.json().catch(() => ({ properties: [] }));
-  return data.properties || [];
+  const data = await res.json().catch(() => ({ data: [] }));
+  return data.data || data.properties || [];
 }

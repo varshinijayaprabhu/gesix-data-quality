@@ -20,20 +20,28 @@ export function downloadPropertiesPdf(properties, filename = 'gesix-data-quality
   y += lineHeight * 1.5;
 
   if (properties.length === 0) {
-    doc.text('No property data to display.', margin, y);
+    doc.text('No dataset records to display.', margin, y);
     doc.save(filename);
     return;
   }
 
-  const colWidths = { add: 55, price: 35, listed_date: 40 };
-  const headers = ['Address', 'Price', 'Listed Date'];
+  // Dynamically extract headers from keys (limit to first 5 for better fit)
+  const allKeys = Object.keys(properties[0]);
+  const headers = allKeys.slice(0, 5); 
+  const availableWidth = pageW - (margin * 2);
+  const colWidth = availableWidth / headers.length;
 
-  doc.setFont(undefined, 'bold');
-  doc.text(headers[0], margin, y);
-  doc.text(headers[1], margin + colWidths.add, y);
-  doc.text(headers[2], margin + colWidths.add + colWidths.price, y);
-  y += lineHeight;
-  doc.setFont(undefined, 'normal');
+  const renderHeader = (currentY) => {
+    doc.setFont(undefined, 'bold');
+    headers.forEach((header, i) => {
+      const cleanHeader = header.replace(/_/g, ' ').toUpperCase();
+      doc.text(cleanHeader.substring(0, 15), margin + (i * colWidth), currentY);
+    });
+    doc.setFont(undefined, 'normal');
+    return currentY + lineHeight;
+  };
+
+  y = renderHeader(y);
 
   doc.setDrawColor(200, 200, 200);
   doc.line(margin, y - 2, pageW - margin, y - 2);
@@ -43,20 +51,15 @@ export function downloadPropertiesPdf(properties, filename = 'gesix-data-quality
     if (y > 270) {
       doc.addPage();
       y = 20;
-      doc.setFont(undefined, 'bold');
-      doc.text(headers[0], margin, y);
-      doc.text(headers[1], margin + colWidths.add, y);
-      doc.text(headers[2], margin + colWidths.add + colWidths.price, y);
-      y += lineHeight;
-      doc.setFont(undefined, 'normal');
+      y = renderHeader(y);
       y += 4;
     }
-    const addr = (row.add ?? row.address ?? '').toString();
-    const price = row.price != null ? String(row.price) : '—';
-    const date = (row.listed_date ?? '').toString();
-    doc.text(addr.substring(0, 32), margin, y);
-    doc.text(price, margin + colWidths.add, y);
-    doc.text(date, margin + colWidths.add + colWidths.price, y);
+    
+    headers.forEach((header, i) => {
+      const val = row[header] != null ? String(row[header]) : '—';
+      doc.text(val.substring(0, 15), margin + (i * colWidth), y);
+    });
+    
     y += lineHeight;
   }
 

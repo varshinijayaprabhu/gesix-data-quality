@@ -1,0 +1,14 @@
+pandas==2.2.3
+requests==2.32.5
+beautifulsoup4==4.14.2
+great_expectations==1.11.3
+pytest==9.0.2
+flask==3.0.3
+flask-cors==5.0.0
+waitress==3.0.2
+python-dotenv==1.0.1
+python-docx==1.1.2
+openpyxl==3.1.2
+Pillow==10.3.0
+pyarrow==19.0.1
+fastparquet==2025.1.0
