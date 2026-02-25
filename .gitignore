@@ -5,13 +5,26 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Data folders (Now allowing data files for team collaboration)
-# data/raw/*
-!data/raw/.gitkeep
-# data/processed/*
-!data/processed/.gitkeep
+# Ignore all data files
+data/raw/*
+data/processed/*
+data/temp/*
+backend/data/raw/*
+backend/data/processed/*
+backend/data/temp/*
 
-# Environments
+# But keep the folders themselves by putting an empty .gitkeep file inside them
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/temp/.gitkeep
+!backend/data/raw/.gitkeep
+!backend/data/processed/.gitkeep
+!backend/data/temp/.gitkeep
+
+# Environments and Secrets
+.env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -20,3 +33,15 @@ ENV/
 # IDE files
 .vscode/
 .idea/
+
+# Logs and Debugging
+logs/
+backend/logs/
+*.log
+debug_output.txt
+
+# Frontend build and dependencies
+frontend/node_modules/
+frontend/dist/
+node_modules/
+dist/
