@@ -23,37 +23,6 @@ function DimCard({ name, score }) {
   );
 }
 
-function MultimediaSuitabilityDash({ data }) {
-  if (!data || data.length === 0) return null;
-
-  const images = data.filter(item => item.multimedia_type === 'Image');
-  if (images.length === 0) return null;
-
-  const total = images.length;
-  const aiReady = images.filter(img => img.suitability?.includes('AI Training')).length;
-  const printReady = images.filter(img => img.suitability?.includes('Professional Print')).length;
-  const webReady = images.filter(img => img.suitability?.includes('Standard Web')).length;
-  const lowQuality = images.filter(img => img.suitability?.includes('Low Quality') || img.suitability === 'Corrupted').length;
-
-  const aiPercent = Math.round((aiReady / total) * 100);
-  const printPercent = Math.round((printReady / total) * 100);
-  const webPercent = Math.round((webReady / total) * 100);
-
-  let analysisText = "";
-  if (aiPercent > 70) analysisText = "High-Quality Collection. Excellent for Computer Vision and AI training.";
-  else if (aiPercent > 30 || webPercent > 50) analysisText = "Moderate Quality. Good for web stores and general UI use.";
-  else if (total > 0) analysisText = "Low-Resolution Collection. Better suited for thumbnails or internal placeholders.";
-  else analysisText = "Collection contains corrupted or non-image assets.";
-
-  return (
-    <div className="suitability-dash">
-      <div className="suitability-summary">
-        <p><strong>Analysis:</strong> {analysisText} {lowQuality > 0 ? `Alert: ${lowQuality} items are low-res or corrupted.` : 'All items passed integrity checks.'}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const [report, setReport] = useState(null);
   const [rawData, setRawData] = useState([]);
@@ -61,45 +30,19 @@ export default function Dashboard() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
 
-  const [sourceType, setSourceType] = useState('api'); // 'api', 'scraping', 'upload'
+  // Simplified to 3 input methods
+  const [sourceType, setSourceType] = useState('upload');
   const [sourceUrl, setSourceUrl] = useState('');
   const [useDateRange, setUseDateRange] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [apiInputMode, setApiInputMode] = useState('link'); // 'link' or 'key'
+  const [apiInputMode, setApiInputMode] = useState('link');
   const [apiKey, setApiKey] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const UPLOAD_TYPES = ['upload', 'pdf', 'docx', 'json_upload', 'xlsx_upload', 'zip_upload', 'xml_upload', 'parquet_upload', 'others_upload'];
-  const isUpload = UPLOAD_TYPES.includes(sourceType);
+  const isUpload = sourceType === 'upload';
 
-  const loadReport = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getReport();
-      if (data.error) throw new Error(data.error);
-      setReport(data);
-    } catch (e) {
-      setError(e.message);
-      setReport(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRawData = async () => {
-    try {
-      const list = await getRawData();
-      setRawData(Array.isArray(list) ? list : []);
-    } catch {
-      setRawData([]);
-    }
-  };
-
-  // Removed auto-load on mount to prevent showing stale data
   useEffect(() => {
-    // Intentionally empty to start fresh
     setReport(null);
     setRawData([]);
     setLoading(false);
@@ -107,7 +50,6 @@ export default function Dashboard() {
 
   const handleSourceChange = (e) => {
     setSourceType(e.target.value);
-    // Reset state when switching formats
     setError(null);
     setSelectedFile(null);
     setSourceUrl('');
@@ -122,22 +64,13 @@ export default function Dashboard() {
     e.preventDefault();
     setError(null);
 
-    // Validation
     if (isUpload) {
       if (!selectedFile) {
-        const label = sourceType === 'upload' ? 'CSV' : sourceType === 'pdf' ? 'PDF' : sourceType === 'docx' ? 'Word' : sourceType === 'json_upload' ? 'JSON' : sourceType === 'xlsx_upload' ? 'Excel' : sourceType === 'zip_upload' ? 'ZIP' : sourceType === 'xml_upload' ? 'XML' : sourceType === 'parquet_upload' ? 'Parquet' : 'Any';
-        setError(`Please select a ${label} file to upload.`);
+        setError('Please select a file to upload.');
         return;
       }
-      if (sourceType !== 'others_upload') {
-        const allowedExt = sourceType === 'upload' ? '.csv' : sourceType === 'pdf' ? '.pdf' : sourceType === 'docx' ? '.docx' : sourceType === 'json_upload' ? '.json' : sourceType === 'xlsx_upload' ? '.xlsx' : sourceType === 'zip_upload' ? '.zip' : sourceType === 'xml_upload' ? '.xml' : '.parquet';
-        if (!selectedFile.name.toLowerCase().endsWith(allowedExt)) {
-          setError(`Unsupported format. Please upload a ${allowedExt} file.`);
-          return;
-        }
-      }
     } else {
-      if (!sourceUrl && !isUpload) {
+      if (!sourceUrl) {
         setError('Please provide a valid Source URL.');
         return;
       }
@@ -146,7 +79,7 @@ export default function Dashboard() {
         return;
       }
       if (useDateRange && (!startDate || !endDate)) {
-        setError('Please select both start and end dates or disable date filtering.');
+        setError('Please select both start and end dates.');
         return;
       }
     }
@@ -155,11 +88,8 @@ export default function Dashboard() {
     setReport(null);
     setRawData([]);
     try {
-      // processData in api.js already throws on failure (success=false),
-      // so if we reach the next line, the pipeline succeeded.
-      // It returns { report, raw_data } — NO "success" field.
       const data = await processData({
-        sourceType,
+        sourceType: isUpload ? 'others_upload' : sourceType,
         sourceUrl,
         startDate: (!isUpload && useDateRange) ? startDate : '',
         endDate: (!isUpload && useDateRange) ? endDate : '',
@@ -171,7 +101,6 @@ export default function Dashboard() {
       const list = data.raw_data?.data || data.raw_data?.properties || [];
       setRawData(Array.isArray(list) ? list : []);
     } catch (e) {
-      // processData throws on backend failure — clear stale data
       setError(e.message);
       setReport(null);
       setRawData([]);
@@ -185,36 +114,20 @@ export default function Dashboard() {
   };
 
   const isFormValid = () => {
-    if (isUpload) {
-      if (sourceType === 'others_upload') return !!selectedFile;
-      const allowedExt = sourceType === 'upload' ? '.csv' : sourceType === 'pdf' ? '.pdf' : sourceType === 'docx' ? '.docx' : sourceType === 'json_upload' ? '.json' : sourceType === 'xlsx_upload' ? '.xlsx' : sourceType === 'zip_upload' ? '.zip' : sourceType === 'xml_upload' ? '.xml' : '.parquet';
-      return selectedFile && selectedFile.name.toLowerCase().endsWith(allowedExt);
-    }
+    if (isUpload) return !!selectedFile;
     const hasUrl = sourceUrl.trim().length > 0;
     const hasKey = (sourceType === 'api' && apiInputMode === 'key') ? apiKey.trim().length > 0 : true;
-    
-    if (useDateRange) {
-      return hasUrl && hasKey && startDate && endDate;
-    }
+    if (useDateRange) return hasUrl && hasKey && startDate && endDate;
     return hasUrl && hasKey;
   };
 
   const getValidationMessage = () => {
     if (isUpload) {
-      const label = sourceType === 'upload' ? 'CSV' : sourceType === 'pdf' ? 'PDF' : sourceType === 'docx' ? 'Word' : sourceType === 'json_upload' ? 'JSON' : sourceType === 'xlsx_upload' ? 'Excel' : sourceType === 'zip_upload' ? 'ZIP' : sourceType === 'xml_upload' ? 'XML' : sourceType === 'parquet_upload' ? 'Parquet' : 'Any';
-      if (!selectedFile) return `Waiting for ${label} file...`;
-      if (sourceType === 'others_upload') return 'Universal file ready.';
-      const allowedExt = sourceType === 'upload' ? '.csv' : sourceType === 'pdf' ? '.pdf' : sourceType === 'docx' ? '.docx' : sourceType === 'json_upload' ? '.json' : sourceType === 'xlsx_upload' ? '.xlsx' : sourceType === 'zip_upload' ? '.zip' : sourceType === 'xml_upload' ? '.xml' : '.parquet';
-      if (!selectedFile.name.toLowerCase().endsWith(allowedExt)) {
-        return `Unsupported format. Please upload a ${allowedExt} file.`;
-      }
-      return 'File ready for processing.';
+      if (!selectedFile) return 'Waiting for file upload...';
+      return `${selectedFile.name} ready for analysis.`;
     }
-    if (sourceType === 'api' && apiInputMode === 'key') {
-      if (!apiKey) return 'Please enter an API Key.';
-    } else {
-      if (!sourceUrl) return 'Please enter a Source URL.';
-    }
+    if (sourceType === 'api' && apiInputMode === 'key' && !apiKey) return 'Please enter an API Key.';
+    if (!sourceUrl) return 'Please enter a Source URL.';
     if (useDateRange && (!startDate || !endDate)) return 'Please select a date range.';
     return 'Parameters set. Ready to process.';
   };
@@ -223,7 +136,7 @@ export default function Dashboard() {
     <div className="dashboard">
       <header className="dashboard-header">
         <h1>Data Trustability Dashboard</h1>
-        <p>Generated by Gesix Data Quality Framework</p>
+        <p>AI-Ready Data Quality Framework — powered by Great Expectations</p>
         <nav>
           <Link to="/">Home</Link>
         </nav>
@@ -246,17 +159,9 @@ export default function Dashboard() {
                 onChange={handleSourceChange}
                 disabled={processing}
               >
-                <option value="api">Dynamic API (Custom Endpoint)</option>
-                <option value="scraping">Web Scraper (Target URL)</option>
-                <option value="upload">Custom CSV Upload</option>
-                <option value="pdf">PDF Document Extraction</option>
-                <option value="docx">MS Word Document Extraction</option>
-                <option value="json_upload">JSON File Upload</option>
-                <option value="xlsx_upload">Excel (XLSX) Upload</option>
-                <option value="zip_upload">ZIP Archive (Multimedia)</option>
-                <option value="xml_upload">XML File Upload</option>
-                <option value="parquet_upload">Apache Parquet Upload</option>
-                <option value="others_upload">Universal Ingestion (Any Format)</option>
+                <option value="upload">📂 File Upload (Any Format)</option>
+                <option value="api">🌐 Dynamic API (Custom Endpoint)</option>
+                <option value="scraping">🔍 Web Scraper (Target URL)</option>
               </select>
             </div>
 
@@ -321,28 +226,12 @@ export default function Dashboard() {
               <div className="file-input-group">
                 <div className="form-group">
                   <label htmlFor="data_file">
-                    Upload {sourceType === 'others_upload' ? 'Any File (Universal)' : 
-                           sourceType === 'upload' ? 'Dataset (CSV)' : 
-                           sourceType === 'pdf' ? 'Document (PDF)' : 
-                           sourceType === 'docx' ? 'Document (Word)' : 
-                           sourceType === 'json_upload' ? 'Dataset (JSON)' : 
-                           sourceType === 'xlsx_upload' ? 'Spreadsheet (XLSX)' : 
-                           sourceType === 'zip_upload' ? 'Archive (ZIP)' : 
-                           sourceType === 'xml_upload' ? 'Data (XML)' : 
-                           'Binary (Parquet)'}
+                    Upload Dataset (CSV, Excel, JSON, PDF, Parquet, XML, or any format)
                   </label>
                   <input
                     type="file"
                     id="data_file"
-                    accept={sourceType === 'others_upload' ? "*" : 
-                            sourceType === 'upload' ? ".csv" : 
-                            sourceType === 'pdf' ? ".pdf" : 
-                            sourceType === 'docx' ? ".docx" : 
-                            sourceType === 'json_upload' ? ".json" : 
-                            sourceType === 'xlsx_upload' ? ".xlsx" : 
-                            sourceType === 'zip_upload' ? ".zip" : 
-                            sourceType === 'xml_upload' ? ".xml" : 
-                            ".parquet"}
+                    accept="*"
                     onChange={(e) => setSelectedFile(e.target.files[0])}
                     disabled={processing}
                   />
@@ -475,14 +364,10 @@ export default function Dashboard() {
         ) : (
           <p className="no-generated-data">Initialize a data source to view the dataset preview.</p>
         )}
-
-        {sourceType === 'zip_upload' && rawData.length > 0 && (
-          <MultimediaSuitabilityDash data={rawData} />
-        )}
       </section>
 
       <footer className="dashboard-footer">
-        <p>End-to-End Backend Verification: COMPLETE</p>
+        <p>Gesix Data Quality Framework — Powered by Great Expectations</p>
       </footer>
     </div>
   );

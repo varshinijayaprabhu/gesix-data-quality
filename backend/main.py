@@ -128,13 +128,8 @@ def run_pipeline(start_date=None, end_date=None, source_type="api", source_url=N
             quality_report = validator.validate(cleaned_file)
             print(f"[*] Post-Loop Trustability = {quality_report.get('overall_trustability')}%")
 
-        # Step 6: Final Reporting
-        print("\n[STEP 5/5] Generating Final Data Quality Dashboard...")
-        from reporting.generator import ReportGenerator
-        reporter = ReportGenerator()
-        reporter.generate_summary(quality_report)
-        reporter.save_report(quality_report)
-        reporter.save_html_report(quality_report)
+        # Step 6: Final Reporting Handled by GUI
+        print("\n[STEP 5/5] Finalizing QA Payload for the Dashboard...")
 
         print("\n" + "="*50)
         print("[OK] PIPELINE EXECUTION FINISHED!")

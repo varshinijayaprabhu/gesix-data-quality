@@ -1,15 +1,27 @@
 import requests
 import os
+import shutil
 import pandas as pd
 import json
+import logging
 from datetime import datetime, timedelta
+
+# Set up logging for ingestion
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# Basic console handler if not already configured upstream
+if not logger.handlers:
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 class UniversalIngestor:
     """
     The Universal Ingestion Engine for the Data Quality Framework.
     
     Responsible for acquiring raw data from disparate streams 
-    including Live APIs, Web Scraping, and Manual CSV Uploads.
+    including Live APIs, Web Scraping, and File Uploads.
     """
     def __init__(self):
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,6 +29,7 @@ class UniversalIngestor:
         
         if not os.path.exists(self.raw_dir):
             os.makedirs(self.raw_dir)
+            logger.info(f"Created raw data directory at {self.raw_dir}")
 
     def _save_raw(self, content, source_name, extension="html"):
         """Utility to save raw data with a timestamp for Lineage tracking."""
@@ -24,21 +37,24 @@ class UniversalIngestor:
         filename = f"{source_name}_{timestamp}.{extension}"
         filepath = os.path.join(self.raw_dir, filename)
         
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(str(content))
-        
-        print(f"[+] Raw data archived: {filepath}")
-        return filepath
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(str(content))
+            logger.info(f"Raw data archived: {filepath}")
+            return filepath
+        except Exception as e:
+            logger.error(f"Failed to save raw data {filename}: {e}")
+            return None
 
     def fetch_api_data(self, api_url: str, start_date: str = None, end_date: str = None, api_key: str = None) -> str:
         """
         Fetches data from a provided API URL. Handles optional date filtering and Authentication keys.
         """
         if not api_url or str(api_url).strip() == "":
-            print("[!] API Error: No URL provided.")
+            logger.error("API Error: No URL provided.")
             return None
 
-        print(f"[*] Calling External API: {api_url}")
+        logger.info(f"Calling External API: {api_url}")
         try:
             from datetime import timezone
             headers = {
@@ -53,7 +69,7 @@ class UniversalIngestor:
                 if "openweathermap.org" in api_url and "appid=" not in api_url:
                     connector = "&" if "?" in api_url else "?"
                     api_url = f"{api_url}{connector}appid={api_key}"
-                    print(f"[*] Auto-Injected OpenWeatherMap appid into URL.")
+                    logger.info("Auto-Injected OpenWeatherMap appid into URL.")
                 
             response = requests.get(api_url, headers=headers, timeout=10)
             response.raise_for_status()
@@ -95,23 +111,29 @@ class UniversalIngestor:
                                 
                             if s_dt <= item_dt <= e_dt:
                                 filtered.append(r)
-                        except: 
+                        except ValueError as ve:
+                            logger.warning(f"Skipping date filter for record due to unparseable date '{date_val}': {ve}")
+                            filtered.append(r)
+                        except Exception as e:
+                            logger.error(f"Unexpected error parsing date '{date_val}': {e}")
                             filtered.append(r)
                     else:
                         filtered.append(r)
                 records = filtered
-                print(f"[*] API Filtered: {len(records)} records found.")
+                logger.info(f"API Filtered: {len(records)} records found.")
             else:
                 # Default logic: Last 15 records
                 records = records[:15]
-                print(f"[*] Fetching baseline records (Limit: {len(records)}).")
+                logger.info(f"Fetching baseline records (Limit: {len(records)}).")
             
             mock_json = json.dumps({"data": records})
             return self._save_raw(mock_json, "api_data", "json")
+        except requests.exceptions.HTTPError as he:
+            logger.error(f"HTTP API Error: {he}")
+            return None
         except Exception as e:
             import traceback
-            print(f"[!] API Error: {e}")
-            traceback.print_exc()
+            logger.error(f"Unexpected API Error: {e}\n{traceback.format_exc()}")
             return None
 
     def scrape_city_records(self, url: str, start_date: str = None, end_date: str = None) -> str:
@@ -119,10 +141,10 @@ class UniversalIngestor:
         Fetches HTML content from a provided URL.
         """
         if not url:
-            print("[!] Scraper Error: No URL provided.")
+            logger.error("Scraper Error: No URL provided.")
             return None
 
-        print(f"[*] Scraping External URL: {url}")
+        logger.info(f"Scraping External URL: {url}")
         try:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -133,226 +155,68 @@ class UniversalIngestor:
             # For simplicity, we save the raw HTML. The converter handles parsing.
             return self._save_raw(response.text, "web_scrape", "html")
         except Exception as e:
-            print(f"[!] Scraper Error: {e}")
+            logger.error(f"Scraper Error: {e}")
             return None
 
-    def handle_user_upload(self, local_file_path):
+    def handle_file_upload(self, local_file_path: str) -> str:
         """
-        Processes any user-uploaded CSV file.
+        Universally handles user file uploads regardless of extension.
+        Directly copies the file to the raw directory with a lineage timestamp
+        to avoid unnecessary memory overhead.
         """
         if not local_file_path:
+            logger.error("Upload Error: No file path provided.")
             return None
             
-        print(f"[*] Processing user upload: {local_file_path}...")
+        logger.info(f"Processing uploaded file: {local_file_path}")
         try:
-            if os.path.exists(local_file_path):
-                # Use encoding_errors='replace' for robustness
-                df = pd.read_csv(local_file_path, encoding="utf-8", encoding_errors="replace")
-                return self._save_raw(df.to_csv(index=False), "user_upload", "csv")
-            else:
-                print("[!] Error: File not found.")
+            if not os.path.exists(local_file_path):
+                logger.error(f"Upload Error: File not found at {local_file_path}")
                 return None
-        except Exception as e:
-            print(f"[!] Upload Error: {e}")
-            return None
-
-    def handle_pdf_upload(self, local_file_path):
-        """
-        Archives a user-uploaded PDF file.
-        """
-        if not local_file_path:
-            return None
-            
-        print(f"[*] Archiving PDF: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"pdf_upload_{timestamp}.pdf"
-                filepath = os.path.join(self.raw_dir, filename)
                 
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] PDF archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: PDF file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] PDF Archiving Error: {e}")
-            return None
-
-    def handle_docx_upload(self, local_file_path):
-        """
-        Archives a user-uploaded Word document.
-        """
-        if not local_file_path:
-            return None
+            # Extract extension or default to bin
+            _, ext = os.path.splitext(local_file_path)
+            ext = ext.lstrip('.').lower() if ext else "bin"
             
-        print(f"[*] Archiving DOCX: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"docx_upload_{timestamp}.docx"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] DOCX archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: DOCX file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] DOCX Archiving Error: {e}")
-            return None
-
-    def handle_json_upload(self, local_file_path):
-        """
-        Archives a user-uploaded JSON file.
-        """
-        if not local_file_path:
-            return None
+            # Provide a descriptive prefix based on file type
+            prefix = f"{ext}_upload" if ext != "bin" else "universal_upload"
             
-        print(f"[*] Archiving JSON: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"json_upload_{timestamp}.json"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] JSON archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: JSON file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] JSON Archiving Error: {e}")
-            return None
-
-    def handle_xlsx_upload(self, local_file_path):
-        """
-        Archives a user-uploaded Excel file.
-        """
-        if not local_file_path:
-            return None
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{prefix}_{timestamp}.{ext}"
+            filepath = os.path.join(self.raw_dir, filename)
             
-        print(f"[*] Archiving XLSX: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"xlsx_upload_{timestamp}.xlsx"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] XLSX archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: XLSX file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] XLSX Archiving Error: {e}")
-            return None
-
-    def handle_zip_upload(self, local_file_path):
-        """
-        Archives a user-uploaded ZIP file.
-        """
-        if not local_file_path:
-            return None
+            # Efficiently copy the file without loading it into pandas/memory
+            shutil.copy2(local_file_path, filepath)
+            logger.info(f"File archived successfully: {filepath}")
             
-        print(f"[*] Archiving ZIP: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"zip_upload_{timestamp}.zip"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] ZIP archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: ZIP file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] ZIP Archiving Error: {e}")
-            return None
-
-    def handle_xml_upload(self, local_file_path):
-        """
-        Archives a user-uploaded XML file.
-        """
-        if not local_file_path:
-            return None
+            return filepath
             
-        print(f"[*] Archiving XML: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"xml_upload_{timestamp}.xml"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] XML archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: XML file not found.")
-                return None
+        except PermissionError:
+            logger.error(f"Upload Error: Permission denied to read {local_file_path} or write to {filepath}")
+            return None
         except Exception as e:
-            print(f"[!] XML Archiving Error: {e}")
+            logger.error(f"Upload Error handling {local_file_path}: {e}")
             return None
 
-    def handle_parquet_upload(self, local_file_path):
-        """
-        Archives a user-uploaded Parquet file.
-        """
-        if not local_file_path:
-            return None
-            
-        print(f"[*] Archiving Parquet: {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"parquet_upload_{timestamp}.parquet"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] Parquet archived: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: Parquet file not found.")
-                return None
-        except Exception as e:
-            print(f"[!] Parquet Archiving Error: {e}")
-            return None
-
+    # Backward compatibility mappings for older scripts that might still call specific methods
+    def handle_user_upload(self, p): return self.handle_file_upload(p)
+    def handle_pdf_upload(self, p): return self.handle_file_upload(p)
+    def handle_docx_upload(self, p): return self.handle_file_upload(p)
+    def handle_json_upload(self, p): return self.handle_file_upload(p)
+    def handle_xlsx_upload(self, p): return self.handle_file_upload(p)
+    def handle_zip_upload(self, p): return self.handle_file_upload(p)
+    def handle_xml_upload(self, p): return self.handle_file_upload(p)
+    def handle_parquet_upload(self, p): return self.handle_file_upload(p)
     def handle_other_upload(self, local_file_path):
-        """
-        Archives any user-uploaded file that doesn't fit standard categories.
-        """
-        if not local_file_path:
+        """Forces 'universal_' prefix so the converter's parse_other_upload can find it."""
+        if not local_file_path or not os.path.exists(local_file_path):
+            logger.error("Upload Error: No file path provided or file not found.")
             return None
-            
-        ext = local_file_path.split('.')[-1].lower() if '.' in local_file_path else "bin"
-        print(f"[*] Archiving Universal Format ({ext}): {local_file_path}...")
-        try:
-            if os.path.exists(local_file_path):
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"universal_{timestamp}.{ext}"
-                filepath = os.path.join(self.raw_dir, filename)
-                
-                import shutil
-                shutil.copy2(local_file_path, filepath)
-                print(f"[+] File archived via Universal Route: {filepath}")
-                return filepath
-            else:
-                print("[!] Error: File not found.")
-                return None
-        except Exception as e:
-            print(f"[!] Universal Archiving Error: {e}")
-            return None
+        _, ext = os.path.splitext(local_file_path)
+        ext = ext.lstrip('.').lower() if ext else "bin"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"universal_{timestamp}.{ext}"
+        filepath = os.path.join(self.raw_dir, filename)
+        shutil.copy2(local_file_path, filepath)
+        logger.info(f"Universal file archived: {filepath}")
+        return filepath
