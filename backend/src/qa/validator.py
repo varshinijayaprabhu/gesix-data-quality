@@ -220,59 +220,25 @@ class DataValidator:
                 res = dataset.expect_column_to_exist(column=expected_col)
                 dimension_scores["Integrity"].append(100.0 if res.success else 0.0)
 
-            # --- REFERENTIAL INTEGRITY CHECK (auto-detect FKs) ---
-            # Heuristic: columns ending with '_id', 'Id', 'ID', or containing 'fk', 'ref', 'parent', etc.
-            fk_candidates = [c for c in df.columns if any(
-                c.lower().endswith(suffix) or s in c.lower()
-                for suffix in ['_id', 'id', 'fk', 'ref', 'parent']
-                for s in ['fk', 'ref', 'parent']
-            )]
-            # Remove metadata columns
-            fk_candidates = [c for c in fk_candidates if c not in metadata_cols]
-
-            # Try to find referenced columns in other DataFrames (if provided)
-            # If not provided, look for columns in same DataFrame with similar names
-            integrity_scores = []
-            for fk_col in fk_candidates:
-                fk_values = set(df[fk_col].dropna().unique())
-                # Try to find referenced column
-                ref_col = None
-                # Simple heuristic: look for columns named like 'id', 'Id', 'ID', or matching table name
-                for c in df.columns:
-                    if c == fk_col:
-                        continue
-                    if c.lower() in ['id', 'identifier'] or c.lower().endswith('_id'):
-                        ref_col = c
-                        break
-                # If not found, just use all values in all other columns
-                if not ref_col:
-                    for c in df.columns:
-                        if c != fk_col and c not in metadata_cols:
-                            ref_col = c
-                            break
-                if ref_col:
-                    ref_values = set(df[ref_col].dropna().unique())
-                    # For each FK value, check if it exists in referenced values
-                    valid_count = sum([v in ref_values for v in fk_values])
-                    total_fk = len(fk_values)
-                    score = (valid_count / total_fk) * 100.0 if total_fk > 0 else 100.0
-                    integrity_scores.append(score)
-                    print(f"    [Integrity] FK '{fk_col}' → '{ref_col}': {valid_count}/{total_fk} valid ({score:.1f}%)")
-                else:
-                    integrity_scores.append(100.0)
-            # If any FK checks found, average them
-            if integrity_scores:
-                dimension_scores["Integrity"].append(sum(integrity_scores) / len(integrity_scores))
+            # --- INTEGRITY CALCULATION ---
+            # Integrity is now calculated as:
+            # 1. Required metadata columns check (source, ingested_at)
+            # 2. Average of other quality dimensions (Accuracy, Validity, Uniqueness, Consistency)
             
-            # --- INTEGRITY SCORE BASED ON OTHER DIMENSIONS ---
-            # If no FK columns detected, set Integrity as average of Accuracy, Validity, Uniqueness, Consistency
-            if not fk_candidates:
-                avg_integrity = 0.0
-                for dim in ["Accuracy", "Validity", "Uniqueness", "Consistency"]:
-                    scores = dimension_scores.get(dim, [])
-                    avg_integrity += (sum(scores) / len(scores)) if scores else 100.0
-                avg_integrity = avg_integrity / 4
-                dimension_scores["Integrity"].append(avg_integrity)
+            # Metadata existence checks
+            for expected_col in ['source', 'ingested_at']:
+                res = dataset.expect_column_to_exist(column=expected_col)
+                dimension_scores["Integrity"].append(100.0 if res.success else 0.0)
+
+            # Average of Accuracy, Validity, Uniqueness, Consistency
+            avg_from_other_dims = 0.0
+            other_dims = ["Accuracy", "Validity", "Uniqueness", "Consistency"]
+            for dim in other_dims:
+                scores = dimension_scores.get(dim, [])
+                avg_from_other_dims += (sum(scores) / len(scores)) if scores else 100.0
+            
+            avg_from_other_dims = avg_from_other_dims / len(other_dims)
+            dimension_scores["Integrity"].append(avg_from_other_dims)
 
             # 7. LINEAGE: Data continuity - checks for blank/empty rows
             #    A blank row = a row where ALL data columns are empty/null/placeholder
