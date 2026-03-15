@@ -1,0 +1,668 @@
+﻿git : 23:14:55.407043 
+http.c:915             
+ == Info: Host 
+huggingface.co:443 was 
+resolved.
+At line:1 char:1
++ git push hf 
+hf-deploy:main --force 
+2>&1 | Out-File 
+-Encoding utf8 pus ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (23:14:55.4070   
+ 43...3 was resolve    
+d.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+23:14:55.408039 
+http.c:915             
+ == Info: IPv6: 2600:90
+00:2179:d800:17:b174:6d
+00:93a1, 2600:9000:2179
+:c200:17:b174:6d00:93a1
+, 2600:9000:2179:6800:1
+7:b174:6d00:93a1, 2600:
+9000:2179:6600:17:b174:
+6d00:93a1, 2600:9000:21
+79:6200:17:b174:6d00:93
+a1, 2600:9000:2179:7800
+:17:b174:6d00:93a1, 260
+0:9000:2179:8800:17:b17
+4:6d00:93a1, 2600:9000:
+2179:c00:17:b174:6d00:9
+3a1
+23:14:55.408039 
+http.c:915             
+ == Info: IPv4: 
+99.86.182.72, 
+99.86.182.39, 
+99.86.182.41, 
+99.86.182.94
+23:14:55.408039 
+http.c:915             
+ == Info:   Trying [260
+0:9000:2179:d800:17:b17
+4:6d00:93a1]:443...
+23:14:55.438450 
+http.c:915             
+ == Info: schannel: 
+disabled automatic use 
+of client certificate
+23:14:55.441957 
+http.c:915             
+ == Info: ALPN: curl 
+offers http/1.1
+23:14:55.919628 
+http.c:915             
+ == Info: ALPN: server 
+accepted http/1.1
+23:14:55.919628 
+http.c:915             
+ == Info: Connected to 
+huggingface.co (2600:90
+00:2179:d800:17:b174:6d
+00:93a1) port 443
+23:14:55.919628 
+http.c:915             
+ == Info: using 
+HTTP/1.x
+23:14:55.919628 
+http.c:862             
+ => Send header, 
+0000000247 bytes 
+(0x000000f7)
+23:14:55.919628 
+http.c:874             
+ => Send header: GET /s
+paces/varshinijayaprabh
+u/data_quality_and_trus
+tability_framework/info
+/refs?service=git-recei
+ve-pack HTTP/1.1
+23:14:55.919628 
+http.c:874             
+ => Send header: Host: 
+huggingface.co
+23:14:55.919628 
+http.c:874             
+ => Send header: 
+User-Agent: 
+git/2.51.0.windows.1
+23:14:55.919628 
+http.c:874             
+ => Send header: 
+Accept: */*
+23:14:55.919628 
+http.c:874             
+ => Send header: 
+Accept-Encoding: 
+deflate, gzip, br, zstd
+23:14:55.919628 
+http.c:874             
+ => Send header: 
+Pragma: no-cache
+23:14:55.919628 
+http.c:874             
+ => Send header:
+23:14:55.919628 
+http.c:915             
+ == Info: Request 
+completely sent off
+23:14:55.957286 
+http.c:915             
+ == Info: schannel: 
+remote party requests 
+renegotiation
+23:14:55.957286 
+http.c:915             
+ == Info: schannel: 
+renegotiating SSL/TLS 
+connection
+23:14:55.958308 
+http.c:915             
+ == Info: schannel: 
+SSL/TLS connection 
+renegotiated
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000027 bytes 
+(0x0000001b)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+HTTP/1.1 401 
+Unauthorized
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000041 bytes 
+(0x00000029)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+Content-Type: 
+text/plain; 
+charset=utf-8
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000020 bytes 
+(0x00000014)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+Content-Length: 29
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+Connection: keep-alive
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000037 bytes 
+(0x00000025)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: Date: 
+Tue, 10 Mar 2026 
+17:44:56 GMT
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000046 bytes 
+(0x0000002e)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+Www-Authenticate: 
+Basic 
+realm="git-frontend"
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000032 bytes 
+(0x00000020)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+X-Cache: Error from 
+cloudfront
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: Via: 
+1.1 2f8bce85b3232f01dc0
+a9ceec714d90c.cloudfron
+t.net (CloudFront)
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Pop: BLR50-P4
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:14:56.187637 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Id: 6BxjcOuKgI
+2aWr4bj5UNxOgvLest59FiQ
+zqwytemUak2e0bw-e0Ifg==
+23:14:56.187637 
+http.c:915             
+ == Info: Ignoring the 
+response-body
+23:14:56.187637 
+http.c:915             
+ == Info: setting size 
+while ignoring
+23:14:56.187637 
+http.c:862             
+ <= Recv header, 
+0000000002 bytes 
+(0x00000002)
+23:14:56.187637 
+http.c:874             
+ <= Recv header:
+23:14:56.187637 
+http.c:915             
+ == Info: Connection 
+#0 to host 
+huggingface.co left 
+intact
+23:14:56.188189 
+http.c:915             
+ == Info: Issue 
+another request to 
+this URL: 'https://vars
+hinijayaprabhu:hf_INXYf
+dAarKJjyODZDVnhGrUXPitC
+YbOGcv@huggingface.co/s
+paces/varshinijayaprabh
+u/data_quality_and_trus
+tability_framework/info
+/refs?service=git-recei
+ve-pack'
+23:14:56.188189 
+http.c:915             
+ == Info: Re-using 
+existing https: 
+connection with host 
+huggingface.co
+23:14:56.188189 
+http.c:915             
+ == Info: Server auth 
+using Basic with user 
+'varshinijayaprabhu'
+23:14:56.188189 
+http.c:862             
+ => Send header, 
+0000000346 bytes 
+(0x0000015a)
+23:14:56.188189 
+http.c:874             
+ => Send header: GET /s
+paces/varshinijayaprabh
+u/data_quality_and_trus
+tability_framework/info
+/refs?service=git-recei
+ve-pack HTTP/1.1
+23:14:56.188189 
+http.c:874             
+ => Send header: Host: 
+huggingface.co
+23:14:56.188189 
+http.c:874             
+ => Send header: 
+Authorization: Basic 
+<redacted>
+23:14:56.188189 
+http.c:874             
+ => Send header: 
+User-Agent: 
+git/2.51.0.windows.1
+23:14:56.188189 
+http.c:874             
+ => Send header: 
+Accept: */*
+23:14:56.188189 
+http.c:874             
+ => Send header: 
+Accept-Encoding: 
+deflate, gzip, br, zstd
+23:14:56.188189 
+http.c:874             
+ => Send header: 
+Pragma: no-cache
+23:14:56.188189 
+http.c:874             
+ => Send header:
+23:14:56.188189 
+http.c:915             
+ == Info: Request 
+completely sent off
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000017 bytes 
+(0x00000011)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+HTTP/1.1 200 OK
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000060 bytes 
+(0x0000003c)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+Content-Type: applicati
+on/x-git-receive-pack-a
+dvertisement
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000021 bytes 
+(0x00000015)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+Content-Length: 248
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+Connection: keep-alive
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000037 bytes 
+(0x00000025)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: Date: 
+Tue, 10 Mar 2026 
+17:44:56 GMT
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000025 bytes 
+(0x00000019)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+Cache-Control: no-cache
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000031 bytes 
+(0x0000001f)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: 
+X-Cache: Miss from 
+cloudfront
+23:14:56.468662 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:14:56.468662 
+http.c:874             
+ <= Recv header: Via: 
+1.1 2f8bce85b3232f01dc0
+a9ceec714d90c.cloudfron
+t.net (CloudFront)
+23:14:56.469312 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:14:56.469312 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Pop: BLR50-P4
+23:14:56.469312 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:14:56.469312 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Id: iwUoJxGGUO
+TtXUlmgSG2tTMFFL-Fj4ptV
+VwV6nAKA82y2IK_71V6WA==
+23:14:56.469312 
+http.c:862             
+ <= Recv header, 
+0000000002 bytes 
+(0x00000002)
+23:14:56.469312 
+http.c:874             
+ <= Recv header:
+23:14:56.469312 
+http.c:915             
+ == Info: Connection 
+#0 to host 
+huggingface.co left 
+intact
+23:14:57.187720 
+http.c:915             
+ == Info: Re-using 
+existing https: 
+connection with host 
+huggingface.co
+23:14:57.187720 
+http.c:915             
+ == Info: Server auth 
+using Basic with user 
+'varshinijayaprabhu'
+23:14:57.187720 
+http.c:862             
+ => Send header, 
+0000000425 bytes 
+(0x000001a9)
+23:14:57.187720 
+http.c:874             
+ => Send header: POST /
+spaces/varshinijayaprab
+hu/data_quality_and_tru
+stability_framework/git
+-receive-pack HTTP/1.1
+23:14:57.187720 
+http.c:874             
+ => Send header: Host: 
+huggingface.co
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+Authorization: Basic 
+<redacted>
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+User-Agent: 
+git/2.51.0.windows.1
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+Accept-Encoding: 
+deflate, gzip, br, zstd
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+Content-Type: applicati
+on/x-git-receive-pack-r
+equest
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+Accept: application/x-g
+it-receive-pack-result
+23:14:57.187720 
+http.c:874             
+ => Send header: 
+Content-Length: 
+10523546
+23:14:57.187720 
+http.c:874             
+ => Send header:
+23:15:20.976637 
+http.c:915             
+ == Info: upload 
+completely sent off: 
+10523546 bytes
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000017 bytes 
+(0x00000011)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+HTTP/1.1 200 OK
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000053 bytes 
+(0x00000035)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+Content-Type: applicati
+on/x-git-receive-pack-r
+esult
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000021 bytes 
+(0x00000015)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+Content-Length: 685
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+Connection: keep-alive
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000037 bytes 
+(0x00000025)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: Date: 
+Tue, 10 Mar 2026 
+17:45:21 GMT
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000025 bytes 
+(0x00000019)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+Cache-Control: no-cache
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000031 bytes 
+(0x0000001f)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+X-Cache: Miss from 
+cloudfront
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: Via: 
+1.1 2f8bce85b3232f01dc0
+a9ceec714d90c.cloudfron
+t.net (CloudFront)
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000024 bytes 
+(0x00000018)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Pop: BLR50-P4
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000071 bytes 
+(0x00000047)
+23:15:21.841459 
+http.c:874             
+ <= Recv header: 
+X-Amz-Cf-Id: zw3WBQxu1n
+JhVIMnBbx76_QUfmKeCqQvy
+9m3p4IQY8aPIGcDYEETuw==
+23:15:21.841459 
+http.c:862             
+ <= Recv header, 
+0000000002 bytes 
+(0x00000002)
+23:15:21.841459 
+http.c:874             
+ <= Recv header:
+23:15:21.841459 
+http.c:915             
+ == Info: Connection 
+#0 to host 
+huggingface.co left 
+intact
+remote: [31m----------
+-----------------------
+-----------------------
+-----------------[0m  
+      
+remote: [31mYour push 
+was rejected because 
+it contains files 
+larger than 10 
+MiB.[0m        
+remote: [31mPlease 
+use https://git-lfs.git
+hub.com/ to store 
+large files.[0m       
+ 
+remote: [31mSee also: 
+https://hf.co/docs/hub/
+repositories-getting-st
+arted#terminal[0m     
+   
+remote: [31m[0m      
+  
+remote: [31mOffending 
+files:[0m        
+remote: [31m  - backen
+d/data/processed/cleane
+d_data.csv (ref: 
+refs/heads/main)[0m   
+     
+remote: [31m  - backen
+d/data/processed/raw_st
+ructured.csv (ref: 
+refs/heads/main)[0m   
+     
+remote: [31m----------
+-----------------------
+-----------------------
+-----------------[0m  
+      
+To https://huggingface.
+co/spaces/varshinijayap
+rabhu/data_quality_and_
+trustability_framework
+ ! [remote rejected] 
+hf-deploy -> main 
+(pre-receive hook 
+declined)
+error: failed to push 
+some refs to 'https://h
+uggingface.co/spaces/va
+rshinijayaprabhu/data_q
+uality_and_trustability
+_framework'
