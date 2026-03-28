@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # Basic console handler if not already configured upstream
-if not logger.handlers:
+if not logger.handlers:                                     
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)

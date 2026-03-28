@@ -78,6 +78,7 @@ TEMP_DIR = workspace["temp"]
 
 CLEANED_PARQUET = os.path.join(PROCESSED_DIR, "cleaned_data.parquet")
 RAW_PARQUET = os.path.join(PROCESSED_DIR, "raw_structured.parquet")
+NOISY_PARQUET = os.path.join(PROCESSED_DIR, "noisy_data.parquet")
 
 # Ensure environment vars are set
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -138,13 +139,14 @@ def get_latest_raw_data():
         return {"data": []}
 
 def get_raw_and_cleaned_data():
-    """Returns both raw_structured and cleaned_data separately."""
+    """Returns raw_structured, cleaned_data, and noisy_data separately."""
     import pandas as pd
     import json
     
     result = {
         "raw_data": [],
-        "cleaned_data": []
+        "cleaned_data": [],
+        "noisy_data": []
     }
     
     RAW_STRUCTURED = os.path.join(PROCESSED_DIR, "raw_structured.parquet")
@@ -153,7 +155,7 @@ def get_raw_and_cleaned_data():
     if os.path.exists(RAW_STRUCTURED):
         try:
             df = pd.read_parquet(RAW_STRUCTURED)
-            if len(df) > 100:
+            if len(df) > 100: 
                 df = df.head(100)
             
             for col in df.select_dtypes(include=['datetime', 'datetimetz']).columns:
@@ -185,6 +187,23 @@ def get_raw_and_cleaned_data():
         except Exception as e:
             print(f"[!] Error reading cleaned_data: {e}")
     
+    # Get noisy_data (with remediation notes showing WHY each row is problematic)
+    if os.path.exists(NOISY_PARQUET):
+        try:
+            df = pd.read_parquet(NOISY_PARQUET)
+            if len(df) > 100:
+                df = df.head(100)
+                
+            for col in df.select_dtypes(include=['datetime', 'datetimetz']).columns:
+                df[col] = df[col].dt.strftime('%Y-%m-%d %H:%M:%S').str.replace(r' 00:00:00$', '', regex=True).replace('NaT', '—')
+                
+            df = df.fillna("—")
+            for col in df.select_dtypes(include=['object', 'string']).columns:
+                df[col] = df[col].apply(lambda x: "—" if isinstance(x, str) and x.strip() == "" else x)
+            result["noisy_data"] = json.loads(df.to_json(orient="records"))
+            print(f"[*] Noisy data: {len(result['noisy_data'])} records (flagged with quality issues)")
+        except Exception as e:
+            print(f"[!] Error reading noisy_data: {e}")
     return result
 
 def get_report_json():
@@ -244,6 +263,34 @@ async def api_report():
 async def get_raw_data_endpoint():
     """Returns the raw ingested data (for table preview)."""
     return get_latest_raw_data()
+
+@app.get("/api/noisy-data", summary="Get Noisy/Problematic Data")
+async def get_noisy_data_endpoint():
+    """Returns the noisy data (rows flagged with quality issues and reasons)."""
+    if not os.path.exists(NOISY_PARQUET):
+        return {"data": []}
+    
+    try:
+        import pandas as pd
+        import json
+        
+        df = pd.read_parquet(NOISY_PARQUET)
+        if len(df) > 100:
+            df = df.head(100)
+        
+        # Format datetime columns
+        for col in df.select_dtypes(include=['datetime', 'datetimetz']).columns:
+            df[col] = df[col].dt.strftime('%Y-%m-%d %H:%M:%S').str.replace(r' 00:00:00$', '', regex=True).replace('NaT', '—')
+        
+        df = df.fillna("—")
+        for col in df.select_dtypes(include=['object', 'string']).columns:
+            df[col] = df[col].apply(lambda x: "—" if isinstance(x, str) and x.strip() == "" else x)
+        
+        data = json.loads(df.to_json(orient="records"))
+        return {"data": data, "count": len(data), "issues_field": "remediation_notes"}
+    except Exception as e:
+        print(f"[!] Error reading noisy data: {e}")
+        return {"data": [], "error": str(e)}
 
 @app.post("/api/process", summary="Trigger Data Quality Pipeline")
 async def api_process(
@@ -439,6 +486,7 @@ async def api_process(
             "cleaned_report": both_reports.get("cleaned_report"),
             "raw_data": {"data": both_data["raw_data"]},
             "cleaned_data": {"data": both_data["cleaned_data"]},
+            "noisy_data": {"data": both_data.get("noisy_data", [])},
             "report_url": pdf_url,
             "eda_url": eda_profile_url,
             "raw_eda_url": raw_eda_profile_url,

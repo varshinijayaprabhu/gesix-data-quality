@@ -11,6 +11,7 @@ export function useDashboard() {
   const [cleanedReport, setCleanedReport] = useState(null);
   const [rawData, setRawData] = useState([]);
   const [cleanedData, setCleanedData] = useState([]);
+  const [noisyData, setNoisyData] = useState([]);
   const [reportUrl, setReportUrl] = useState(null);
   const [edaUrl, setEdaUrl] = useState(null);
   const [rawEdaUrl, setRawEdaUrl] = useState(null);
@@ -27,6 +28,7 @@ export function useDashboard() {
     setCleanedReport(null);
     setRawData([]);
     setCleanedData([]);
+    setNoisyData([]);
     setReportUrl(null);
     setRetrievedRecord(null);
 
@@ -51,6 +53,11 @@ export function useDashboard() {
         data.cleaned_data?.data || data.cleaned_data?.properties || [];
       setCleanedData(Array.isArray(cleanedList) ? cleanedList : []);
 
+      // Get noisy data (flagged rows with quality issues)
+      const noisyList =
+        data.noisy_data?.data || data.noisy_data?.properties || [];
+      setNoisyData(Array.isArray(noisyList) ? noisyList : []);
+
       return data;
     } catch (err) {
       setError(err.message);
@@ -67,14 +74,14 @@ export function useDashboard() {
     setReport(null);
     try {
       const record = await retrieveAnalysis(fileId);
-      
+
       // Store as a retrieved record (metadata only, not a full analysis report)
       setRetrievedRecord(record);
       setReportUrl(record.analysis_report_url);
       setEdaUrl(record.eda_profile_url);
       setRawEdaUrl(record.raw_eda_profile_url);
       setAnalysisId(record.id);
-      
+
       return record;
     } catch (err) {
       setError(err.message);
@@ -90,6 +97,7 @@ export function useDashboard() {
     setCleanedReport(null);
     setRawData([]);
     setCleanedData([]);
+    setNoisyData([]);
     setReportUrl(null);
     setEdaUrl(null);
     setRawEdaUrl(null);
@@ -104,6 +112,7 @@ export function useDashboard() {
     cleanedReport,
     rawData,
     cleanedData,
+    noisyData,
     reportUrl,
     edaUrl,
     rawEdaUrl,
@@ -116,4 +125,3 @@ export function useDashboard() {
     loadRemoteAnalysis,
   };
 }
-

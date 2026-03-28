@@ -42,14 +42,15 @@ EMBEDDED_HEADER_PATTERNS = [
 
 class DataCleaner:
     """
-    ML-Grade Preprocessing & Remediation Engine.
+    ML-Grade Preprocessing & Remediation Engine with Data Segregation.
     
-    Performs comprehensive data cleaning suitable for ML model training:
-    - Smart detection and removal of embedded headers/labels in spreadsheets
-    - Missing value imputation (mean/median/mode based on distribution)
-    - Outlier detection and capping using IQR method
-    - Type inference and coercion
-    - Deduplication and structural cleanup
+    NOW CREATES 3-WAY DATA SPLIT instead of removing problematic rows:
+    - cleaned_data.parquet: High-quality rows (ready for ML/analysis)
+    - noisy_data.parquet: Problematic rows with explanations (data quality issues)
+    - raw_structured.parquet: Original untouched data (for reference)
+    
+    NEVER REMOVES DATA - only flags and segregates it.
+    All problematic rows are preserved with detailed quality issue notes.
     """
     
     def __init__(self):
@@ -57,13 +58,39 @@ class DataCleaner:
         self.output_dir = workspace["processed"]
         self.input_file = os.path.join(self.output_dir, "raw_structured.parquet")
         self.output_file = os.path.join(self.output_dir, "cleaned_data.parquet")
+        self.noisy_file = os.path.join(self.output_dir, "noisy_data.parquet")
         self.imputation_stats = {}  # Track what was imputed for transparency
+        self.noisy_rows_indices = set()  # Track which rows are problematic
 
     def load_data(self):
         if not os.path.exists(self.input_file):
             logger.error(f"Target file {self.input_file} not found. Cannot run Remediation.")
             return None
         return pd.read_parquet(self.input_file)
+
+    def _add_noisy_flag(self, df, row_indices, reason):
+        """
+        Marks rows as noisy/problematic and tracks the reason.
+        Appends to remediation_notes without removing the row.
+        
+        Args:
+            df: DataFrame
+            row_indices: List or Index of row indices to flag
+            reason: String explanation of why rows are problematic
+        """
+        if 'remediation_notes' not in df.columns:
+            df['remediation_notes'] = ""
+        
+        for idx in row_indices:
+            if idx not in self.noisy_rows_indices:  # First time flagging this row
+                df.at[idx, 'remediation_notes'] = reason
+                self.noisy_rows_indices.add(idx)
+            else:  # Already flagged, append to notes
+                existing = str(df.at[idx, 'remediation_notes']).strip()
+                if reason not in existing:
+                    df.at[idx, 'remediation_notes'] = existing + f" | {reason}"
+        
+        return df
 
 
     # STEP 1: EMBEDDED HEADER & LABEL DETECTION
@@ -107,9 +134,9 @@ class DataCleaner:
     
     def remove_embedded_headers(self, df):
         """
-        Removes rows that are actually embedded headers, section labels, or summary rows.
+        Flags rows that are actually embedded headers, section labels, or summary rows.
+        DOES NOT REMOVE - marks them in remediation_notes as unhandled/noisy data.
         Common in Excel exports where users add section titles mid-data.
-        Has safety checks to avoid over-aggressive removal.
         """
         logger.info("Scanning for embedded headers and label rows...")
         
@@ -119,34 +146,29 @@ class DataCleaner:
             
         data_cols = [c for c in df.columns if c not in METADATA_COLS]
         
-        # Identify rows to remove
-        rows_to_drop = []
+        # Identify rows to FLAG (not remove)
+        rows_to_flag = []
         for idx, row in df.iterrows():
             if self._is_embedded_header_row(row[data_cols], data_cols):
-                rows_to_drop.append(idx)
+                rows_to_flag.append(idx)
         
-        # SAFETY CHECK: Don't remove too many rows (likely false positives)
-        removal_ratio = len(rows_to_drop) / initial_len if initial_len > 0 else 0
-        if removal_ratio > 0.3:  # More than 30% flagged = something is wrong
-            logger.warning(f"⚠️ Skipping header removal: {removal_ratio:.0%} of rows flagged (too aggressive)")
-            rows_to_drop = []
+        # Flag all identified rows
+        if rows_to_flag:
+            df = self._add_noisy_flag(df, rows_to_flag, "Embedded header/section label row detected")
+            logger.info(f"Flagged {len(rows_to_flag)} embedded header/label rows as noisy (NOT removed).")
         
-        if rows_to_drop:
-            df = df.drop(index=rows_to_drop)
-            logger.info(f"Removed {len(rows_to_drop)} embedded header/label rows.")
-        
-        # Also remove rows where ALL data columns match the column name (header repeated)
-        # This is safe because it requires EXACT column name matches
+        # Also flag exact duplicate header rows
         duplicate_header_mask = df[data_cols].apply(
             lambda row: all(str(row[c]).lower().strip() == str(c).lower().strip() for c in data_cols if pd.notna(row[c])),
             axis=1
         )
         if duplicate_header_mask.any():
-            df = df[~duplicate_header_mask]
-            logger.info(f"Removed {duplicate_header_mask.sum()} exact header duplicate rows.")
+            header_dup_indices = df[duplicate_header_mask].index.tolist()
+            df = self._add_noisy_flag(df, header_dup_indices, "Exact header row duplicate")
+            logger.info(f"Flagged {duplicate_header_mask.sum()} exact header duplicate rows as noisy (NOT removed).")
         
-        logger.info(f"Header cleanup: {initial_len} → {len(df)} rows.")
-        return df.reset_index(drop=True)
+        logger.info(f"Header scan complete: {len(rows_to_flag)} rows flagged as noisy data.")
+        return df
 
 
     # STEP 2: TYPE INFERENCE & COERCION
@@ -238,11 +260,9 @@ class DataCleaner:
     def impute_missing_values(self, df):
         """
         ML-grade missing value imputation:
-        - Numeric (normal distribution): Mean imputation
-        - Numeric (skewed distribution): Median imputation
-        - Categorical/String: Mode imputation
-        - High missing rate (>50%): Flag but still impute with fallback
-        - All-null columns: Drop the column entirely
+        - Rows with >50% missing: FLAGGED as noisy data (not imputed)
+        - Standard missing: Numeric (mean/median), Categorical (mode), DateTime (ffill/bfill)
+        - All-null columns: Dropped entirely
         """
         logger.info("Running ML-grade missing value imputation...")
         
@@ -251,30 +271,40 @@ class DataCleaner:
             df['remediation_notes'] = ""
         df['remediation_notes'] = df['remediation_notes'].fillna("").astype(str)
         
+        # FLAG rows with >50% missing values BEFORE imputation
+        data_cols = [col for col in df.columns if col not in METADATA_COLS]
+        if data_cols:
+            missing_per_row = df[data_cols].isna().sum(axis=1)
+            missing_rate_per_row = missing_per_row / len(data_cols)
+            high_missing_mask = missing_rate_per_row > 0.5
+            
+            if high_missing_mask.any():
+                high_missing_indices = df[high_missing_mask].index.tolist()
+                high_missing_count = len(high_missing_indices)
+                
+                # Add detailed reason for each row
+                for idx in high_missing_indices:
+                    missing_pct = int(missing_rate_per_row[idx] * 100)
+                    reason = f"Row has {missing_pct}% missing values (>{high_missing_count} columns)"
+                    df = self._add_noisy_flag(df, [idx], reason)
+                
+                logger.warning(f"  ⚠ {high_missing_count} rows flagged as noisy: {missing_rate_per_row[high_missing_mask].mean()*100:.0f}% avg missing")
+        
         # First pass: identify and drop columns that are ALL null (useless)
         all_null_cols = [col for col in df.columns if col not in METADATA_COLS and df[col].isna().all()]
         if all_null_cols:
-            logger.warning(f"  ⚠ Dropping {len(all_null_cols)} all-null columns: {all_null_cols}")
+            logger.warning(f"  → Dropping {len(all_null_cols)} all-null columns: {all_null_cols}")
             df = df.drop(columns=all_null_cols)
         
+        # NOW IMPUTE missing values (for ALL rows, both clean and noisy)
         for col in df.columns:
             if col in METADATA_COLS:
                 continue
             
             missing_count = df[col].isna().sum()
-            missing_rate = missing_count / len(df) if len(df) > 0 else 0
             
             if missing_count == 0:
                 continue
-            
-            # High missing rate warning (but still impute)
-            if missing_rate > 0.5:
-                logger.warning(f"  ⚠ '{col}' has {missing_rate:.0%} missing - flagging rows")
-                mask = df[col].isna()
-                df.loc[mask, 'remediation_notes'] = df.loc[mask, 'remediation_notes'].apply(
-                    lambda x: x + f"High missing rate in {col}; " if f"High missing rate in {col}" not in x else x
-                )
-                # Still continue to impute below
             
             # Numeric column imputation
             if pd.api.types.is_numeric_dtype(df[col]):
@@ -321,34 +351,20 @@ class DataCleaner:
                 self.imputation_stats[col] = {'strategy': 'ffill/bfill', 'value': 'temporal', 'count': missing_count}
                 logger.info(f"  → '{col}': {missing_count} nulls imputed with forward/backward fill")
         
-        # Final verification - report any remaining nulls
-        remaining_nulls_total = df.drop(columns=['remediation_notes'], errors='ignore').isna().sum().sum()
-        if remaining_nulls_total > 0:
-            logger.error(f"  ❌ CRITICAL: {remaining_nulls_total} null values still remain after imputation!")
-            # Force fill any stragglers
-            for col in df.columns:
-                if col in METADATA_COLS:
-                    continue
-                if df[col].isna().any():
-                    if pd.api.types.is_numeric_dtype(df[col]):
-                        df[col] = df[col].fillna(0)
-                    else:
-                        df[col] = df[col].fillna("Unknown")
-            logger.info("  → Force-filled remaining nulls with defaults (0 for numeric, 'Unknown' for text)")
-        else:
-            logger.info("  ✓ All missing values successfully imputed - dataset is ML-ready")
-        
+        logger.info("  ✓ Missing value imputation complete (noisy rows preserved)")
         return df
 
  
     # STEP 4: OUTLIER DETECTION & HANDLING
     
-    def handle_outliers(self, df, method='cap'):
+    def handle_outliers(self, df, method='flag'):
         """
         Outlier detection using IQR method.
         
         Args:
-            method: 'cap' (winsorize to bounds), 'remove' (drop rows), or 'flag' (just mark)
+            method: 'flag' (default - mark as noisy), 'cap' (winsorize), or 'remove'
+        
+        Note: Default changed to 'flag' - problematic rows are marked but NOT removed
         """
         logger.info(f"Running outlier detection (method={method})...")
         
@@ -356,6 +372,7 @@ class DataCleaner:
         numeric_cols = [c for c in numeric_cols if c not in METADATA_COLS]
         
         outlier_count = 0
+        flagged_indices = []
         
         for col in numeric_cols:
             Q1 = df[col].quantile(0.25)
@@ -372,25 +389,32 @@ class DataCleaner:
                 continue
             
             outlier_count += col_outliers
+            outlier_indices = df[outlier_mask].index.tolist()
             
-            if method == 'cap':
+            if method == 'flag':
+                # Mark as noisy but keep the data
+                for idx in outlier_indices:
+                    reason = f"Outlier detected in {col} (value={df.at[idx, col]:.4g}, bounds=[{lower_bound:.4g}, {upper_bound:.4g}])"
+                    df = self._add_noisy_flag(df, [idx], reason)
+                    if idx not in flagged_indices:
+                        flagged_indices.append(idx)
+                logger.info(f"  → '{col}': {col_outliers} outliers flagged as noisy (NOT removed)")
+            
+            elif method == 'cap':
                 # Winsorization: cap values to bounds
                 df.loc[df[col] < lower_bound, col] = lower_bound
                 df.loc[df[col] > upper_bound, col] = upper_bound
                 logger.info(f"  → '{col}': {col_outliers} outliers capped to [{lower_bound:.2f}, {upper_bound:.2f}]")
             
             elif method == 'remove':
-                df = df[~outlier_mask]
-                logger.info(f"  → '{col}': {col_outliers} outlier rows removed")
-            
-            elif method == 'flag':
-                df.loc[outlier_mask, 'remediation_notes'] = df.loc[outlier_mask, 'remediation_notes'].apply(
-                    lambda x: x + f"Outlier in {col}; " if f"Outlier in {col}" not in x else x
-                )
-                logger.info(f"  → '{col}': {col_outliers} outliers flagged")
+                # Legacy support - but flag them instead
+                for idx in outlier_indices:
+                    reason = f"Outlier in {col} (value={df.at[idx, col]:.4g})"
+                    df = self._add_noisy_flag(df, [idx], reason)
+                logger.warning(f"  → '{col}': {col_outliers} outlier rows flagged (method='remove' deprecated)")
         
         if outlier_count > 0:
-            logger.info(f"Total outliers handled: {outlier_count}")
+            logger.info(f"Total outliers handled: {outlier_count} rows flagged as noisy")
         
         return df
 
@@ -461,10 +485,10 @@ class DataCleaner:
     
     def remove_blank_rows(self, df):
         """
-        Removes rows where ALL data columns are blank/null/placeholder.
-        These rows affect Lineage score in validation.
+        Flags rows where ALL data columns are blank/null/placeholder as noisy data.
+        DOES NOT REMOVE - marks them in remediation_notes.
         """
-        logger.info("Removing blank rows (all data columns empty)...")
+        logger.info("Scanning for blank rows (all data columns empty)...")
         
         initial_len = len(df)
         data_cols = [c for c in df.columns if c not in METADATA_COLS]
@@ -483,13 +507,14 @@ class DataCleaner:
         
         # Apply to data columns only
         blank_mask = df[data_cols].apply(is_row_blank, axis=1)
-        blank_count = blank_mask.sum()
+        blank_indices = df[blank_mask].index.tolist()
+        blank_count = len(blank_indices)
         
         if blank_count > 0:
-            df = df[~blank_mask].reset_index(drop=True)
-            logger.info(f"  → Removed {blank_count} blank rows ({blank_count/initial_len*100:.1f}%)")
+            df = self._add_noisy_flag(df, blank_indices, "Entire row is blank/empty - no valid data")
+            logger.info(f"  → Flagged {blank_count} blank rows as noisy (NOT removed, {blank_count/initial_len*100:.1f}%)")
         else:
-            logger.info("  → No blank rows found")
+            logger.info("  → No completely blank rows found")
         
         return df
 
@@ -935,20 +960,43 @@ class DataCleaner:
     
     def deduplicate(self, df):
         """
-        Removes duplicate rows. Keeps first occurrence.
+        Flags duplicate rows as noisy data. DOES NOT REMOVE.
+        Keeps all occurrences but marks them with indices of other duplicates.
         """
+        logger.info("Scanning for duplicate rows...")
+        
         initial_len = len(df)
         
         # Get data columns only (ignore metadata for duplicate detection)
         data_cols = [c for c in df.columns if c not in METADATA_COLS]
         
-        df = df.drop_duplicates(subset=data_cols, keep='first')
+        if 'remediation_notes' not in df.columns:
+            df['remediation_notes'] = ""
         
-        removed = initial_len - len(df)
-        if removed > 0:
-            logger.info(f"Deduplication: Removed {removed} duplicate rows.")
+        # Find duplicates (don't drop, mark them)
+        duplicate_mask = df[data_cols].duplicated(keep=False)  # mark ALL duplicates including first
         
-        return df.reset_index(drop=True)
+        if duplicate_mask.any():
+            duplicate_indices = df[duplicate_mask].index.tolist()
+            
+            # For each duplicate group, flag all but the first as "duplicate"
+            for idx in duplicate_indices:
+                # Check if this row matches any other row
+                row_data = df.loc[idx, data_cols]
+                matching_rows = df[data_cols].apply(lambda x: (x == row_data).all(), axis=1)
+                other_matches = df[matching_rows & (df.index != idx)].index.tolist()
+                
+                if other_matches:
+                    match_indices = ", ".join(str(i) for i in other_matches[:5])  # Show first 5
+                    reason = f"Duplicate of row(s): {match_indices}"
+                    df = self._add_noisy_flag(df, [idx], reason)
+            
+            duplicate_count = duplicate_mask.sum()
+            logger.info(f"  → Flagged {duplicate_count} duplicate rows as noisy (NOT removed)")
+        else:
+            logger.info("  → No duplicates found")
+        
+        return df
 
     
     # STEP 7: CATEGORICAL ENCODING
@@ -1195,17 +1243,17 @@ class DataCleaner:
         df = self.impute_missing_values(df)
         
         # Step 8: Handle outliers - improves Accuracy
-        df = self.handle_outliers(df, method=outlier_method)
+        df = self.handle_outliers(df, method='flag')  # Default to flagging, not removing
         
         # Step 9: Deduplicate - improves Uniqueness
         df = self.deduplicate(df)
         
-        # Final null check before encoding (encoding fails on nulls)
+        # Final null check before final processing (encoding fails on nulls)
         data_cols = [c for c in df.columns if c not in METADATA_COLS]
         total_nulls = df[data_cols].isna().sum().sum()
         
         if total_nulls > 0:
-            logger.error(f"  ❌ {total_nulls} null values detected before encoding!")
+            logger.error(f"  ❌ {total_nulls} null values detected before final processing!")
             for col in data_cols:
                 if df[col].isna().any():
                     if pd.api.types.is_numeric_dtype(df[col]):
@@ -1214,47 +1262,78 @@ class DataCleaner:
                         df[col] = df[col].fillna("Unknown")
             logger.info("  → Applied emergency fallback imputation")
         
-        # Step 9: Encode categorical variables (optional)
+        # Step 10: Encode categorical variables (optional)
         if encode_categorical:
             df = self.encode_categorical(df)
         
-        # Step 10: Correct skewness (optional, before scaling for better results)
+        # Step 11: Correct skewness (optional, before scaling for better results)
         if correct_skew:
             df = self.correct_skewness(df, threshold=1.0)
         
-        # Step 11: Scale numeric features (optional)
+        # Step 12: Scale numeric features (optional)
         if scale_method:
             df = self.scale_features(df, method=scale_method)
         
-        # Remove remediation_notes if empty (no useful audit info)
-        if 'remediation_notes' in df.columns:
-            if df['remediation_notes'].fillna('').str.strip().eq('').all():
-                df = df.drop(columns=['remediation_notes'])
-                logger.info("  Dropped empty remediation_notes column")
+        # ===== NOW SPLIT INTO CLEANED AND NOISY DATA =====
+        logger.info("=" * 60)
+        logger.info("  SPLITTING DATA: CLEANED vs NOISY")
+        logger.info("=" * 60)
+        
+        # Separate cleaned and noisy rows
+        cleaned_mask = ~df.index.isin(self.noisy_rows_indices)
+        df_cleaned = df[cleaned_mask].copy()
+        df_noisy = df[~cleaned_mask].copy()
+        
+        logger.info(f"✓ CLEANED DATA: {len(df_cleaned)} rows (high quality)")
+        logger.info(f"⚠ NOISY DATA: {len(df_noisy)} rows (quality issues flagged)")
+        
+        # Drop remediation_notes from cleaned data if empty (no issues)
+        if 'remediation_notes' in df_cleaned.columns:
+            if df_cleaned['remediation_notes'].fillna('').str.strip().eq('').all():
+                df_cleaned = df_cleaned.drop(columns=['remediation_notes'])
+                logger.info("  → Dropped empty remediation_notes from cleaned data")
+        
+        # Keep remediation_notes in noisy data (shows WHY each row is problematic)
+        if 'remediation_notes' in df_noisy.columns:
+            # Ensure notes are filled (should already be, but safety check)
+            df_noisy['remediation_notes'] = df_noisy['remediation_notes'].fillna("Data quality issues detected")
         
         # Save cleaned data with timestamp for preservation
         from datetime import datetime as dt
         timestamp = dt.now().strftime("%Y%m%d_%H%M%S")
         timestamped_path = os.path.join(self.output_dir, f"cleaned_data_{timestamp}.parquet")
-        df.to_parquet(timestamped_path, index=False)
+        df_cleaned.to_parquet(timestamped_path, index=False)
         logger.info(f"  Archived cleaned data: {timestamped_path}")
         
         # Also save as "latest" for the app to use
-        df.to_parquet(self.output_file, index=False)
+        df_cleaned.to_parquet(self.output_file, index=False)
+        logger.info(f"  ✓ Saved: {self.output_file}")
         
-        final_rows = len(df)
-        final_cols = len([c for c in df.columns if c not in METADATA_COLS])
-        final_nulls = df.drop(columns=list(METADATA_COLS), errors='ignore').isna().sum().sum()
+        # Save noisy data (will be empty if no issues detected)
+        timestamped_noisy = os.path.join(self.output_dir, f"noisy_data_{timestamp}.parquet")
+        df_noisy.to_parquet(timestamped_noisy, index=False)
+        logger.info(f"  Archived noisy data: {timestamped_noisy}")
+        
+        df_noisy.to_parquet(self.noisy_file, index=False)
+        logger.info(f"  ✓ Saved: {self.noisy_file}")
+        
+        final_rows = len(df_cleaned) + len(df_noisy)
+        final_cols = len([c for c in df_cleaned.columns if c not in METADATA_COLS])
+        
+        # Calculate null stats for both datasets
+        data_cols_cleaned = [c for c in df_cleaned.columns if c not in METADATA_COLS]
+        data_cols_noisy = [c for c in df_noisy.columns if c not in METADATA_COLS]
+        nulls_in_cleaned = df_cleaned[data_cols_cleaned].isna().sum().sum()
+        nulls_in_noisy = df_noisy[data_cols_noisy].isna().sum().sum() if len(df_noisy) > 0 else 0
         
         logger.info("=" * 60)
         logger.info("  PREPROCESSING COMPLETE")
         logger.info("=" * 60)
-        logger.info(f"  Rows: {initial_rows} → {final_rows} ({initial_rows - final_rows} removed)")
+        logger.info(f"  Total Rows: {initial_rows} → {final_rows} (0 removed)")
+        logger.info(f"  Cleaned Rows: {len(df_cleaned)} (ML-ready, no null values)")
+        logger.info(f"  Noisy Rows: {len(df_noisy)} (flagged, preserved for review)")
         logger.info(f"  Columns: {initial_cols} → {len(df.columns)} (after encoding)")
         logger.info(f"  Data Columns: {final_cols}")
-        logger.info(f"  Remaining Nulls: {final_nulls}")
-        logger.info(f"  ML-Ready: {'✓ YES' if final_nulls == 0 else '✗ NO'}")
-        logger.info(f"  Output: {self.output_file}")
         logger.info("=" * 60)
         
         # Log transformation summaries
@@ -1277,6 +1356,12 @@ class DataCleaner:
             logger.info("Skewness Corrections:")
             for col, info in self.skewness_transforms.items():
                 logger.info(f"  • {col}: {info['type']} (skew {info['original_skewness']:.2f})")
+        
+        logger.info("=" * 60)
+        logger.info(f"  Cleaned Data: {len(df_cleaned)} rows → {self.output_file}")
+        logger.info(f"  Noisy Data: {len(df_noisy)} rows → {self.noisy_file}")
+        logger.info(f"  Reason field: 'remediation_notes' column in noisy data")
+        logger.info("=" * 60)
         
         return self.output_file
 

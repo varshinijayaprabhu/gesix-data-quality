@@ -126,6 +126,7 @@ export default function Dashboard() {
     cleanedReport,
     rawData,
     cleanedData,
+    noisyData,
     reportUrl,
     edaUrl,
     rawEdaUrl,
@@ -171,7 +172,6 @@ export default function Dashboard() {
     navigator.clipboard.writeText(text);
   };
 
-
   const isValidUrl = (urlStr) => {
     try {
       const parsed = new URL(urlStr);
@@ -216,6 +216,10 @@ export default function Dashboard() {
   const cleanedTableKeys =
     cleanedData.length > 0 && typeof cleanedData[0] === "object"
       ? Object.keys(cleanedData[0])
+      : [];
+  const noisyTableKeys =
+    noisyData.length > 0 && typeof noisyData[0] === "object"
+      ? Object.keys(noisyData[0])
       : [];
   const isNoData = report?.status === "No Data Found for this period";
   const showResults = report && !report.error && !isNoData;
@@ -894,6 +898,124 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* Combined Preprocessing View: Raw → Cleaned + Noisy */}
+                {(cleanedData.length > 0 || noisyData.length > 0) && (
+                  <div className="w-full">
+                    <div className="mb-8">
+                      <h3 className="text-3xl md:text-4xl font-serif font-bold tracking-tight mb-3 flex items-center gap-3">
+                        <ShieldCheck className="w-8 h-8 text-primary" />
+                        Preprocessing Results
+                      </h3>
+                      <p className="text-lg text-muted-foreground font-medium">
+                        Complete view of preprocessing: {cleanedData.length}{" "}
+                        cleaned rows + {noisyData.length} flagged rows ={" "}
+                        {cleanedData.length + noisyData.length} total processed
+                      </p>
+                    </div>
+
+                    <div className="border border-border/50 rounded-2xl overflow-hidden bg-background">
+                      <div className="overflow-x-auto max-h-[700px] overflow-y-auto">
+                        <Table className="w-full min-w-max">
+                          <TableHeader className="bg-secondary/30 sticky top-0 z-10">
+                            <TableRow className="border-border/50 hover:bg-transparent">
+                              <TableHead className="font-semibold text-foreground whitespace-nowrap px-6 py-4 h-auto text-sm uppercase tracking-widest w-40">
+                                Status
+                              </TableHead>
+                              {cleanedTableKeys.map((key) => (
+                                <TableHead
+                                  key={key}
+                                  className="font-semibold text-foreground whitespace-nowrap px-6 py-4 h-auto text-sm uppercase tracking-widest"
+                                >
+                                  {key.replace(/_/g, " ")}
+                                </TableHead>
+                              ))}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {/* Cleaned rows */}
+                            {cleanedData.map((row, i) => (
+                              <TableRow
+                                key={`clean-${i}`}
+                                className="border-border/50 hover:bg-secondary/20 transition-colors bg-green-50/30 dark:bg-green-950/20"
+                              >
+                                <TableCell className="font-bold text-green-700 dark:text-green-400 px-6 py-4 whitespace-nowrap">
+                                  ✓ Cleaned
+                                </TableCell>
+                                {cleanedTableKeys.map((key) => (
+                                  <TableCell
+                                    key={key}
+                                    className="font-mono text-base px-6 py-4 whitespace-nowrap text-muted-foreground"
+                                  >
+                                    {row[key] != null ? String(row[key]) : "—"}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+
+                            {/* Noisy rows with flags */}
+                            {noisyData.map((row, i) => (
+                              <TableRow
+                                key={`noisy-${i}`}
+                                className="border-border/50 hover:bg-amber-100/20 transition-colors bg-amber-50/30 dark:bg-amber-950/20"
+                              >
+                                <TableCell className="font-bold text-amber-900 dark:text-amber-200 px-6 py-4 whitespace-normal max-w-xs break-words">
+                                  ⚠️ Flagged
+                                  <br />
+                                  <span className="text-xs font-mono opacity-75">
+                                    {row["remediation_notes"] != null
+                                      ? String(
+                                          row["remediation_notes"],
+                                        ).substring(0, 50) +
+                                        (String(row["remediation_notes"])
+                                          .length > 50
+                                          ? "..."
+                                          : "")
+                                      : "See notes"}
+                                  </span>
+                                </TableCell>
+                                {noisyTableKeys
+                                  .filter((k) => k !== "remediation_notes")
+                                  .map((key) => (
+                                    <TableCell
+                                      key={key}
+                                      className="font-mono text-base px-6 py-4 whitespace-nowrap text-muted-foreground"
+                                    >
+                                      {row[key] != null
+                                        ? String(row[key])
+                                        : "—"}
+                                    </TableCell>
+                                  ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex gap-3">
+                        <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-900 dark:text-blue-200">
+                          <p>
+                            <strong>Data Preservation Policy:</strong> No rows
+                            are removed during preprocessing. Rows with quality
+                            issues are flagged with detailed reasons. You can
+                            review these rows and decide whether to:
+                          </p>
+                          <ul className="list-disc list-inside mt-2 ml-2 space-y-1">
+                            <li>Manually correct and re-upload</li>
+                            <li>Remove manually if truly invalid</li>
+                            <li>
+                              Accept as-is if issues are acceptable for your use
+                              case
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1053,16 +1175,16 @@ export default function Dashboard() {
                       {analysisId}
                     </p>
                   </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => copyToClipboard(analysisId)}
-                      className="w-full h-14 rounded-xl flex items-center justify-center gap-3 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-300 group border-2"
-                    >
-                      <Copy className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-bold uppercase tracking-widest text-xs">
-                        Copy Analysis ID
-                      </span>
-                    </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => copyToClipboard(analysisId)}
+                    className="w-full h-14 rounded-xl flex items-center justify-center gap-3 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-300 group border-2"
+                  >
+                    <Copy className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <span className="font-bold uppercase tracking-widest text-xs">
+                      Copy Analysis ID
+                    </span>
+                  </Button>
                 </div>
               )}
 

@@ -39,6 +39,7 @@ export async function processData(options) {
     cleaned_report: data.cleaned_report,
     raw_data: data.raw_data,
     cleaned_data: data.cleaned_data,
+    noisy_data: data.noisy_data,
     report_url: data.report_url,
     eda_url: data.eda_url,
     raw_eda_url: data.raw_eda_url,
