@@ -1,0 +1,47 @@
+# Python .gitignore for Data Quality Project
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore all data files
+data/raw/*
+data/processed/*
+data/temp/*
+backend/data/raw/*
+backend/data/processed/*
+backend/data/temp/*
+
+# But keep the folders themselves by putting an empty .gitkeep file inside them
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/temp/.gitkeep
+!backend/data/raw/.gitkeep
+!backend/data/processed/.gitkeep
+!backend/data/temp/.gitkeep
+
+# Environments and Secrets
+.env
+.env.*
+!.env.example
+.venv/
+env/
+venv/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs and Debugging
+logs/
+backend/logs/
+*.log
+debug_output.txt
+
+# Frontend build and dependencies
+frontend/node_modules/
+frontend/dist/
+node_modules/
+dist/

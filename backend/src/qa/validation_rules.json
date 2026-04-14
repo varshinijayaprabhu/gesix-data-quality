@@ -1,0 +1,72 @@
+{
+  "description": "Configurable validation rules for data quality checks. Rules affect the Validity dimension score.",
+  "rule_types": [
+    "regex       - value must match regex pattern",
+    "not_null    - value cannot be null/empty",
+    "range       - numeric value between min and max",
+    "enum        - value must be one of allowed values (case-insensitive)",
+    "date_format - date must match specified format",
+    "length      - string length between min_len and max_len",
+    "email       - value must be valid email format",
+    "url         - value must be valid URL format",
+    "phone       - value must match phone pattern (E.164 or custom)"
+  ],
+  "rules": [
+    {
+      "column": "email",
+      "type": "email",
+      "enabled": true,
+      "message": "Must be a valid email address"
+    },
+    {
+      "column": "phone",
+      "type": "regex",
+      "pattern": "^[+]?[0-9\\s\\-().]{7,20}$",
+      "enabled": true,
+      "message": "Must be a valid phone number"
+    },
+    {
+      "column": "url",
+      "type": "url",
+      "enabled": true,
+      "message": "Must be a valid URL"
+    },
+    {
+      "column": "age",
+      "type": "range",
+      "min": 0,
+      "max": 150,
+      "enabled": true,
+      "message": "Age must be between 0 and 150"
+    },
+    {
+      "column": "status",
+      "type": "enum",
+      "values": ["active", "inactive", "pending", "suspended"],
+      "enabled": true,
+      "message": "Status must be one of: active, inactive, pending, suspended"
+    },
+    {
+      "column": "created_at",
+      "type": "not_null",
+      "enabled": true,
+      "message": "Creation date cannot be null"
+    },
+    {
+      "column": "name",
+      "type": "length",
+      "min_len": 1,
+      "max_len": 255,
+      "enabled": true,
+      "message": "Name must be 1-255 characters"
+    }
+  ],
+  "pattern_aliases": {
+    "e164_phone": "^\\+[1-9]\\d{1,14}$",
+    "us_phone": "^(\\+1)?[2-9]\\d{2}[2-9]\\d{6}$",
+    "postal_code_us": "^\\d{5}(-\\d{4})?$",
+    "postal_code_uk": "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$",
+    "ip_address": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+    "credit_card": "^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})$"
+  }
+}
